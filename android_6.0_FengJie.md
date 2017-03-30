@@ -22,7 +22,7 @@
   - 实现方案（模仿Openthos)
    **ActivityManagerNative.java中添加关闭的方法**
 
-    public boolean closeActivity(int stackId) throws RemoteException {
+   public boolean closeActivity(int stackId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
