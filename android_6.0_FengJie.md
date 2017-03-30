@@ -26,14 +26,14 @@
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-                   data.writeInt(stackId);
-                   mRemote.transact(CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION, data, reply, 0);
-                   reply.readException();
-                   boolean[] ret = new boolean[1];
-                   reply.readBooleanArray(ret);
-                   data.recycle();
-                   reply.recycle();
-                   return ret[0];
+        data.writeInt(stackId);
+        mRemote.transact(CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean[] ret = new boolean[1];
+        reply.readBooleanArray(ret);
+        data.recycle();
+        reply.recycle();
+        return ret[0];
     }
 
   **AMS extends AMN**
