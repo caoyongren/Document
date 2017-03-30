@@ -51,3 +51,22 @@
     }
 
     ```
+***
+    AMS中重要函数：
+    ```
+        startHomeActivityLocked(int userId, String reason) {
+            ...
+            mStackSupervisor.startHomeActivity(intent, aInfo, reason);//启动Home
+            ...
+        }
+        
+        systemReady(final Runnable goingCallback) {
+            systemReady函数完成了系统就绪的必要工作，然后它将启动Home Activity。至此，Android系统就全部启动了。
+        }
+
+    ```
+***
+![AMS逻辑图](ams.png)
+
+***
+[详细](http://blog.csdn.net/innost/article/details/47254381)
