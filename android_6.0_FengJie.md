@@ -22,10 +22,10 @@
   - 实现方案（模仿Openthos)
    **ActivityManagerNative.java中添加关闭的方法**
 
-     ''' public boolean closeActivity(int stackId) throws RemoteException {
-                   Parcel data = Parcel.obtain();
-                   Parcel reply = Parcel.obtain();
-                   data.writeInterfaceToken(IActivityManager.descriptor);
+    public boolean closeActivity(int stackId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
                    data.writeInt(stackId);
                    mRemote.transact(CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION, data, reply, 0);
                    reply.readException();
@@ -34,7 +34,7 @@
                    data.recycle();
                    reply.recycle();
                    return ret[0];
-      }'''
+    }
 
   **AMS extends AMN**
 
