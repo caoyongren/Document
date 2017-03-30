@@ -23,6 +23,7 @@
    **ActivityManagerNative.java中添加关闭的方法**
 
    public boolean closeActivity(int stackId) throws RemoteException {
+
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
