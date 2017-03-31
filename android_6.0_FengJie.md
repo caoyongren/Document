@@ -72,7 +72,51 @@
 
 ***
 
-## multiWindow的 focus
-    setFocus
+### multiWindow的 focus
+    - setFocusStack
+
+    问题： 当APP 窗口缩小时，点击桌面，这是桌面获得焦点，APP窗口就会隐藏。不符合多窗口的特点
+         Openthos 采用的策略是 将 桌面放入栈底。但是  在桌面重命名的开发中仍有桌面获不到焦点的问题.
+    
+    - 代码： 位置 ActivityStackSupervisor.java
+
+    void setFocusStack(ActivityRecord r, String reason) {
+        ...
+        moveHomeStack(isHomeActivity, reason);
+    }
+
+    void moveHomeStack(boolean toFront, String reason) {
+        ArrayList<ActivityStack> stacks = mHomeStack.mStacks;//放入集合中
+        //这里进行逻辑判断处理。
+        //Openthos中仍有一个疑惑在： StartupMenu中应用打开全是全屏情况。
+    }
+
+### stack 创建
+         - adjustStackFocus 每次生成新窗口，强制启动一个新的stack。 位置： ActivityStackSupervisor.java
+         - 代码
+    ActivityStack adjustStackFocus(ActivityRecord r, boolean newTask) {
+        //让所有的Activity在一个栈中。
+        ...
+        final ActivityContainer container = r.mInitialActivityContainer;
+        if (container != null) {
+            //第一次把它放在所需的堆栈,这之后放在任务堆栈。
+            r.mInitialActivityContainer = null;
+            return container.mStack;
+        }
+        ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
+        for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = homeDisplayStacks.get(stackNdx);
+            if (!stack.isHomeStack()) {
+                ...
+                mFocusedStack = stack;
+                return mFocusedStack;
+            }
+        }
+    }
+
+### stack 创建大小调整
+  - android 6.0 : resizeStack调整 全屏； getInitializingRect函数 生成窗口大小和位置，再调用resizeStack
+  - getInitializingRect 使窗口层叠出现。同时调用WMS的getDisplayMetrics依据屏幕进行窗口大小位置的调整。
+  - 在WMS中添加getDisplayMetrics方法。
 
 
