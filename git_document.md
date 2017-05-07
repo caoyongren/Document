@@ -91,4 +91,14 @@
 
 31. git tag stable-l 1b2edfadsfa //指定某个提交，方便根基标签查看和回顾
 
-32. //---先写到 git rebase
+32. git rebase
+  - git  checkout myWork (自己分支)
+  - git rebase origin 
+  - 目的： 把你的分支 myWork 取消掉，并且把它们临时保存为补丁放到 .git/rebase目录中，然后把myWork分支更新到最新的origin分支，最后把保存的补丁apply到 myWork分支上。
+
+33. 在git rebase 过程中，也许会出现冲突， 在这种情况，git 会停止rebase并会让你去解决冲突； 解决后，用 git-add 命令更新，不需要git-commit;
+  git rebase --continue //继续应用余下的补丁。
+
+34. git rebase --abort // 终止 rebase 的行动。
+
+35. 
