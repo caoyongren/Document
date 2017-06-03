@@ -65,4 +65,54 @@
       - adb install ./../../.apk
     
     ============
-    
+   ### 代码格式
+
+   1. 注意空格(少用TAB)
+     - 距离 4个空格
+     - 级别对齐
+     - 不能有多余空格
+     - （diff 中可以看出有无空格）
+     - / $
+   2.长度
+     - > 95字符
+     - 分行注意：1. 可读性
+                 2. 美观性
+   3. 括号中两个参数 ，逗号后要加 空格
+
+   4. if （）{
+      } else {
+      
+      }
+   5. 方法名后Method() {}
+
+   6. 两个方法间加空行。
+
+   7. Intent字符串 定义在 Intent.java中。
+
+   8. 软编码
+     - 布局中 style theme
+     - string dimen color;
+
+     mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+     getResources().getString(R.string.selinux_status_disabled);
+
+     int widthPw = mContext.getResources().getDimensionPixelSize
+                                    (R.dimen.popupwindow_width);
+                                                    int heightPw = mContext.getResources().getDimensionPixelSize
+                                                                                   (R.dimen.popupwindow_height);
+
+                                                                                     
+   9. 字符常量： 定义成public final string STRING_PATH = "com.openthos";
+     (定义在一个类，多个类使用)
+
+   10. 注释：和源码一样规格
+    /*
+     *
+     **/
+
+   11. 对外暴露属性： 封装 set get 方法；
+
+   12. 代码要简短，少写一行，就少一行；
+
+   13. 最重要的原则；
+     - Don`t make me think.
