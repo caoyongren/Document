@@ -18,6 +18,7 @@
     find ./ -name Phone* //在某个目录中搜索
   - 17.对比源码: vimdiff
   - 18.分屏显示代码: vsp
+    - 在一个文件的编辑中使用Vsp 另一个文件
   - 19.显示行号: set number
   - 20.删除粘贴： dd + p
   - 21.复制粘贴: y + number + p
@@ -38,6 +39,9 @@
   - 34.git 指令和vim指令结合: git log | grep "MasterMan"
   - 35.安装ctags跳转函数: sudo apt-get install ctags // ctags -R *//做标记
     ctrl + ] // 返回: ctrl + t
+  - 36.vim -on file1 file2 //水平分屏幕
+  - 37. vim -On file file2 //垂直分屏幕
+  - 38. find ./ | grep "" | grep "" 逐级搜索
 
 ### 二. Git
   - 1.下载: git clone + GitPath
@@ -158,7 +162,33 @@
     - 推送标签到服务器  git push origin 1.0-r1  / git push origin -tags
     - 查看标签　git tab -l
     - 删除远程仓库中生成的标签  git push origin --delete tag tagname
- 
+
+  - 31. 二分查找
+    - git bisect start
+    - git bisect bad
+    //确定一个坏的版本(一般就是当前版本)
+    - git bisect good v1.0
+    //确定一个好的版本
+    - git bisect reset //重置你的HEAD指针到最开始的位置．
+  - 32.取消暂存的文件
+    - git reset HEAD file
+    - 应用:
+      - 当git add *后有文件不需要提交, 则进行git reset HEAD file取消
+
+  - 33.修改提交
+    - git commit --amend //主要应用修改commit描述
+  - 34.数据恢复
+    - 前提: 当master分之丢失，你需要他的两次最新提交
+    - 1. git relog //从log缓存中读取commit id
+    - 2. git log -g //详细显示
+    - 3. git branch recover_branch commit id//恢复到分之: recover_branch
+    - 4. 成功恢复 commit id
+   - 查看所有分之的最后一次的提交 
+    - git branch -v
+   - 从服务器中更新代码
+    - git pull (git fetch git merge　之外)
+   
+
 ### 三．ubuntu
   - 1.进入文件夹: cd cyr/
   - 2.删除文件: rm debug.txt
@@ -230,12 +260,79 @@
   - 33.修改terminator配置:sudo vim ~/.config/terminator/config
   - 34.安装软件: sudo apt-get install +apk
   - 35.任务栏换位置: gsettings set com.canonical.Unity.Launcher launcher-position Bottom
-  - 36.
+  - 36. 将一个文件夹中所有文件写入一个文件中:
+    - ll >> aa.txt
+
+  - 37.查看文件：
+       ls
+	ls-F  查看目录中的文件
+        ls-I显示文件和目录的详细资料
+	ls-a显示隐藏文件
+  - 38.加权限:
+    - chmod 777 文件夹
+
+
+### git rebase 和 git merge 区别
+  - git merge 是用来合并两个分之的．
+    - git merge b
+      - 将ｂ分之合并到当前分之．
+
+  - git rebase b
+   - 也是把ｂ分之合并到当前分支．
+
+案例：
+
+        origin
+
+  c1<-- c2 
+
+        myWork
+
+然后，有人在origin上做了提交，　myWork也做了提交
+
+                       origin
+
+c1 <-- c2 < ---c3 <--- C4
+
+               C5 <----C6
+                        myWork
+
+你可以git pull把origin上修改的的code拉下来，　然后　git merge.
+
+                        origin
+
+c1 <-- c2 < -- c3 < --- c4
+
+       c2< --  c5 < --- c6< --- c7
+
+                                myWork
+
+但是，提交历史记录发生改变，如果要想保持和origin一样的提交历史：
+
+　　- git checkout myWork
+    - git rebase origin
+
+原理：
+　　- 把你的myWork分支里的每个提交取消掉，并且临时保存为补丁，
+　　- ./git/rebase目录中，　然后再应用上．
+
+    
+
+### 解决冲突
+  - git-add
+  - git rebase --continue
+
 
 ***
 gitHup账号: caoyongren  密码: caoyongren00
 邮箱: m18410261910@163.com 密码:caoyongren00
 CSDN: MatthewCaoYongren caoyongren00  or zhenxi2735768804 
+  - Apple ID
+    - matthewcaoyongren@163.com
+    - Caoyongren00
+    - 禹朴勇
+    - 产品经理
+    - 成武县
 
 ***
 
@@ -303,7 +400,105 @@ CSDN: MatthewCaoYongren caoyongren00  or zhenxi2735768804
 
 ### docker
   - 概念　??
+  - 问题: 当无法进入docker
+    - sudo docker kill dockerId
+    - sudo docker kill -9 dockerId
 
+### android studio 使用
+  - ctrl + E ; 最近编辑的文件列表。
+  
+  - ctrl + [/]; 可以跳到大括号的开头 结尾
+
+  - Ctrl+Shift+Backspace ；可以跳转到上次编辑的地方
+
+  - Ctrl+F12，可以显示当前文件的结构。
+
+  - Ctrl+F7可以查询当前元素在当前文件中的引用，然后按F3可以选择
+
+  - ctrl+N，可以快速打开类 -- > 输入类名
+
+  - Ctrl+Shift+N，可以快速打开文件 -- > 输入文件名
+
+  - Alt+Q可以看到当前方法的声明
+
+  - Ctrl+P，可以显示参数信息
+
+  - Alt+Insert可以生成构造器/Getter/Setter等
+  
+  - Ctrl+Alt+T可以把代码包在一块内，例如try/catch
+
+  - Alt+Up and Alt+Down可在方法间快速移动
+
+  - Alt + Enter ; 导入包，自动修正
+
+  - ctrl + R 替换文本
+
+  - ctrl + f 本文件中查找 / ctrl + Shift + f 本工程中查找
+
+  - Alt + Shift + c 对比最近修改的代码
+
+  - Shift + F6 重构 - 重命名
+
+  - ctrl + D 复制行
+
+  - ctrl + /  ; 注释  ctrl + Shift + /  块注释
+
+  - ctrl + shift + up /down ; 移动代码块
+
+  - Shift + f2 ; 高亮错误快速定位
+
+  - ctrl + g ; 输入行号；
+
+  - ctrl + o 可以选择父类的方法进行重写；
+
+  - ctrl + alt + space 类名自动完成；
+
+  - ctrl + alt + o 删除多余包；
+
+  - alt + f7 ;  -- > 选中右键 find usage 查找方法的调用处;
+
+  - alt + f8 ;  -- > 选中右键 Evalute Expresion  ;deBUG 查看变量中的数据;
+
+  - 连续点击两次 shift ---> 可以进行快速查找类.
+
+  - Gson 快捷键: Alt + s
+
+  - Alt+shift+C：查看工程的最近修改。
+
+  - Ctrl+J  自动代码
+
+  - Ctrl+E 最近打开的文件
+
+  - Ctrl+H 显示类结构图
+
+  - Ctrl+Q 显示注释文档
+
+  - ctrl + {}  进行跳转
+  - ctrl + alt + M　抽取为方法
+
+=================================================================
+插件：
+Lifecycle Sorter：
+可以根据Activity或者fragment的生命周期对其生命周期方法位置进行先后排序，快捷键Ctrl + alt + K 
+
+==================================================================
+  ** android studio出现的异常及解决： **
+  - 出现异常，找不到SDK 
+  - 解决：：左上角File >> Setting >> Plugins >> 把Android Support勾选上，点击Apply，再点OK，会提示重启，重启完就好。
+  - 运行按钮变暗
+  - 解决： “Run”->“Edit Configurations  
+    - 打开Run/Debug Configuration窗口。在窗口右侧找到“target device”部分，勾选“USB device”前面的单选框。点击“ok”。
+
+内存泄露就是指,本应该回收的内存,还驻留在内存中。
+  - android studio中在terminal中进行测试:
+    - 测试：
+  adb shell monkey -p 包名
+
+***
+
+### 反编译
+  - 1. apktool d xx.apk
+  - 2. apktool b xx ((xxx 为反编译apk出来的文件夹))
 
 
 
