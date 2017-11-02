@@ -123,6 +123,9 @@
   - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/stack/
     - NotificationStackScrollLayout.java
       - 通知消息的主要逻辑．
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/
+    - QSView.java
+      - 新增自定义View.主要用于实现qs.
 
 #### 通知栏的布局
   - frameworks/base/packages/SystemUI/res/layout/
@@ -156,5 +159,77 @@
           - 该方法为public, 只要可以获取到PanelView对象就可以实现该方法.
           - NotificationPanelView extends PanelView
           - 则只要获取NotificationPanelView的对象即可，事情变的简单．
+    - 隔离模式
+    ```
+     ┊   final ConnectivityManager mgr = (ConnectivityManager) mContext
+     ┊   ┊   ┊   .getSystemService(Context.CONNECTIVITY_SERVICE);
+     ┊   final EthernetManager ethManager = (EthernetManager) mContext
+     ┊   ┊   ┊ getSystemService(ContextETHERNET_SERVICE);                                                                                                              
+     ┊   mgr.setAirplaneMode(state);
+    ```
+    - 截屏模式
+      - 目前在arm上没有实现，按照5.1的实现逻辑是利用设备支持快捷截屏的代码.
+      ```
+      ┊   ┊   ┊   ┊   ((InputManager)mContext.getSystemService(Context.INPUT_SERVICE))
+      ┊   ┊   ┊   ┊       .sendKeyEvent(KeyEvent.KEYCODE_SYSRQ);
+      ```
+
+### 关机界面实现
+
+***
+
+#### 关机界面的设计
+  - 目前是启动一个Activity. PowerSourceActivity.
+  
+#### 关机界面的代码结构
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/power/
+    - PowerSourceActivity.java
+      - power_off
+```
+143     ┊   ┊   ┊   Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+144     ┊   ┊   ┊   intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+145     ┊   ┊   ┊   intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+146     ┊   ┊   ┊   startActivity(intent); 
+```
+      - power_restart
+      
+```
+150     ┊   ┊   ┊   PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+151     ┊   ┊   ┊   pm.reboot("true"); 
+```
+      - power_lock
+      
+```
+155     ┊   ┊   ┊   DevicePolicyManager mDevicePolicyManager = (DevicePolicyManager)
+156             ┊   ┊   ┊   ┊   getSystemService(Context.DEVICE_POLICY_SERVICE);
+157     ┊   ┊   ┊   if (mDevicePolicyManager.isAdminActive(LockReceiver.getCn(this))) {
+158     ┊   ┊   ┊   ┊   mDevicePolicyManager.lockNow();
+159     ┊   ┊   ┊   } else {
+160     ┊   ┊   ┊   ┊   Intent intentLock = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+161     ┊   ┊   ┊   ┊   intentLock.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, LockReceiver.getCn(this));
+162     ┊   ┊   ┊   ┊   intentLock.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "lock screen");
+163     ┊   ┊   ┊   ┊   startActivity(intentLock);
+164     ┊   ┊   ┊   } 
+```
+      - power_sleep
+      
+ ```
+168     ┊   ┊   ┊   PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+169     ┊   ┊   ┊   powerManager.goToSleep(SystemClock.uptimeMillis());
+
+ ```
+
+#### 关机界面的布局
+  - frameworks/base/packages/SystemUI/res/layout/
+    - activity_power_source.xml
+      - 鼠标移动获得焦点使用的属性:android:nextFocusRight="@id/"
+
+### 关键代码
+  - 锁屏的设计代码
+    - frameworks/base/packages/SystemUI/src/com/android/systemui/
+      - LockReceiver.java
+        - 主要用于继承DeviceAdminReceiver.
+        - 这个设计是借鉴的5.1的实现，而5.1的实现主要还是借鉴的锁屏app的实现逻辑．
+
 
 #### 持续更新　
