@@ -5,7 +5,9 @@
 #### 8.0 StartupMenu设计
   - 1. 在原有5.1的基础上进行的修改.
   - 2. 借用TaskBar的启动方式．
+    - TaskBar可以针对Oreo系统根据不同的Task_id进行启动．
   - 3. 将StartupMenu以SystemUI的Dialog形式启动．
+    - 通过Dialog的方式启动效率更高．
   - 4. 将StartupMenu移植到SystemUI中．
 
 #### 8.0 StartupMenu结构
@@ -42,8 +44,13 @@
 
 #### 8.0 任务栏设计
   - 1. 利用原生NavigationBar的基础.
-  - 2. 新添加布局 oponthos status bar.
+    - 5.1 利用的是Status Bar. 由于Status Bar的逻辑比较复杂且耦合性比较强
+    - 相反，NavigationBar的代码逻辑比较清晰，可以模仿进行替换一个布局.
+    - 这样对以后的版本升级，会更方便．
+  - 2. 新添加布局 oponthos status Bar.
+    - 自己添加的布局，无论是后期的维护或扩展，可控性增强．
   - 3. 在StatusBar中使用addOpenthosStatusBarLayout替换createNavigationBar.
+    - 不改变原有的任何逻辑，只是将原有的放弃使用，使用自己的布局．
 
 #### 8.0 任务栏的结构
   - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/
@@ -113,9 +120,13 @@
 
 #### 通知栏的设计
   - 在status_bar_expanded.xml 中include 一个新布局.
+    - 由于5.1的实现在后期的工作中出现太多问题，则放弃5.1的修改方案，使用添加新布局方案.
+    - 在新布局中保有原有的通知消息的布局．
   - 将之前的qs_panel进行gone掉．
+    - 原生的qs逻辑过于复杂，将原生的隐藏，借用原生的功能实现的代码．
   - 新的布局中保有<NotificationStackScrollLayout/>布局．
-  
+    - 通知消息的接收逻辑不变．
+
 #### 通知栏的结构
   - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/
     - NotificationPanelView.java
