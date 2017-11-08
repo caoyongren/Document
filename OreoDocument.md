@@ -242,5 +242,42 @@
         - 主要用于继承DeviceAdminReceiver.
         - 这个设计是借鉴的5.1的实现，而5.1的实现主要还是借鉴的锁屏app的实现逻辑．
 
+### 最小化的实现(7.1)
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/
+    - PhoneStatusBar.java
+      - extends BaseStatusBar.java
+      - changeStatusBarIcon(TaskBar taskId, ComponentName cpm, boolean keep)
+        - 任务栏的图标改变．
+　
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/statubar/
+    - BaseStatusBar.java
+      - implements CommandQueue.Callback;
+    - CommandQueue.java
+      - extends IStatusBar.Stub
+      - Callback接口定义了方法: changeStatusBarIcon(TaskBar taskId, ComponentName cpm, boolean keep);
+  - frameworks/base/core/java/com/android/internal/statusbar/
+    - IStatusBar.aidl  
+      - 接口中定义changeStatusBarIcon(..);//client端
+    - IStatusBarService.aidl
+      - 接口中定义changeStatusBarIcon(..);//服务端
+
+### 通知消息
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone
+    - StatusBar.java
+      - 1. 清除所有消息．
+        - clearAllNotifications()
+      - 2. addNotificationViews(final Entry entry)//添加通知消息
+      - 3. removeNotification(entry.key, mRankingMap);//删除单个消息
+  - frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/
+    - NotificationData.java
+      - 通知消息的模型类．
+  - 
+### 通知消息布局
+  - packages/SystemUI/res/layout/
+    - status_bar_notification_row.xml 
+      - 通知消息item的布局.
+    - notification_info.xml
+      - 长按通知消息弹出的布局.
+  
 
 #### 持续更新　
