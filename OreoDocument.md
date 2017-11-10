@@ -278,6 +278,12 @@
       - 通知消息item的布局.
     - notification_info.xml
       - 长按通知消息弹出的布局.
-  
+
+### 通知消息的逻辑:
+    - NotificationListenerService 在系统通知的消息传递过程中，起到了代理作用．
+    - 继承NotificationListenerService的类作为client端，真正的server端则是NotificationManagerService,
+    - 它负责整个Notification的控制与管理．
+    - NotificationManagerService将处理之后的结果通过NotificationListenerService返回给client端．
+    - 最终各个client端通过onNotificationPosted()和onNotificationRemoved()方法拿到系统通知状态变更信息．
 
 #### 持续更新　
