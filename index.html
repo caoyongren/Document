@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+    <head>
+        <title>
+            JavaScript
+        </title>
+        <script type = "text/javascript">
+            var varName = 123;
+            var varName2;
+            var s1 = "hello";
+            var s2 = ",world!";
+            //alert(s1 + s2);
+            //------------------------------弱类型
+            //alert (varName / s2);//弱类型
+            //NaN: not a number 的缩写；
+            //alert (123 * "2");//弱类型将＂２＂　转换为 2.--> 246
+            //alert (123 + "2");//＋　倾向于　字符连接；
+            //就是数字自动转化字符串;
+            //前面是字符串一定是字符串　：１ + 2 + "3"
+            //alert (123 - "2");
+
+            //------------------------------逻辑运算符
+            //alert(3);//３　－－＞　true;
+            //prompt ("请输入：");
+            /*
+            var a = prompt("请输入：");
+            a *=1;//字符串转换为数字；
+            //alert (a);//NaN则失败；
+
+            if (isNaN(a)) {
+                alert("非法数字");
+            } else {
+　　　　　　　　alert("ok");
+            }*/
+
+            //------------------------------document + 语法
+            /*
+            for (var i = 0 ; i < 10 ; i ++) {
+                document.write(i + "<br />");
+            }
+            while (true) {
+                alert ("关不上的窗口");
+            }
+　　　　　　do {
+                
+            } while();
+            */
+
+            //------------------------------函数与内置对象
+            //var width = window.prompt("请输入三角形的底边长度");
+            //var hight = window.prompt("请输入三角形的高");
+            //getArea(width, hight);
+            /*
+            var area = width * hight / 2;
+            if (!isNaN(area)) {
+                alert("三角形的面积为："　＋　area);
+            } else {
+                alert("您输入有误！");
+            }
+            */
+
+            // function functionName() {
+
+            //}
+            /*
+　　　　　　function getArea(width, hight) {
+                var area = width * hight / 2;
+                if (!isNaN(area)) {
+                    alert ("三角形面积:" + area);
+                } else {
+                    alert ("输入有误！");
+                }
+　　　　　　}*/
+            // Math / Date / 数组 /　obj / string /
+            var a = new Array();
+            a[0] = 123;
+            a[1] = 1234;
+            a[2] = 12345;
+
+            alert(a[0]);
+            alert(a[1]);
+            alert(a[2]);
+            alert(a.length);
+            //动态类型 var a = [];
+            // 1. 多类型
+            // 2. a.length
+            // 3. 数组下标从零开始
+            // 4. 数组最大下标为数组长度减一．
+            // 5. for 循环遍历数组
+            // 6. var b = new Array(1, 2, 3);
+            // 7. a.push(); 返回值是数组新的长度；可以添加多个．
+            // 8. delete a[1];//删除下标１的值，但是数组的长度不变
+            // 9. a.join("#"); //连接数组　s= a.join(""); 和字符串连接．
+            for (var i = 0 ; i < a.length ; i ++) {
+                if (a[i] != undefined) {
+                    alert(a[i]);
+                }
+            }
+            document.write(Math.PI);           
+            d.push(456);
+            var l = d.push(12, 123, 1234);
+            //obj 名称 : 值 var obj = [];
+            var obj = {
+                "age" : 18,
+                "sex" : "男"
+            }
+　　　　　　obj.adb = 456;
+            obj[0] = 12345;
+            //访问: obj.["age"];
+            //遍历
+            for (var i in obj) {
+                //foreach 
+                alert(i + " : " + obj[i]);
+            }
+            //可以数组中存对象: var obj = [] ; obj[0] = {};
+           //string
+           //1. str.length
+           //2. str.indexOf("0");//从0开始计数
+　　       //3. str.lastIndexOf("e");
+           //4. str.charCodeAt(0);//115
+           //5. str.replace("some", "much");
+           //6. str.split("，");//分开
+           //7. str.substr(1, 2);//从下标１往后截取２个字符．
+        </script>
+    </head>
+    <body>
+     
+    
+    </body>
+</html>

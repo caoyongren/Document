@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+    <head>
+        <title> 函数式与面向对象 </title>
+        <script type="text/javascript">
+            function fn1() {
+                alert('fn1');
+            }
+            //lambda 函数表达式
+            //不具名函数，一个表达式
+　　　　　　var a;
+            a = function () {
+                alert('fn2');
+            };
+            /*
+            var l = (a="abc").length;
+            alert(l);
+
+            var c = (a=Math).sqrt(2);
+            alert(c);
+            alert(a);*/
+            //立即执行并传参数 
+            (function () {
+                alert("abc");
+            })();
+        //在函数执行时有个arguments对象，保存所有参数
+        //arguments对象，类似数组，可以用下标访问，并且
+        //有length 属性
+        // alert(arguments.length);
+        /*
+        function arg(a, b, c) {
+            for (var i = 0; i < arguments.length; i++) {
+                alert(arguments[i]);
+            }
+        }*/
+        //阶乘的函数式递归写法； 
+        //function fnAdd(n) {
+            //return n ? n * fnAdd(n - 1) : 1;
+        //}
+        //alert(fnAdd(0));
+        //函数的名字可以像变量一样赋值；
+        //var c = fnAdd;
+        //fnAdd = null;
+        //alert(faAdd);
+        //====================================
+        //闭包，指的是词法表示包括不被计算的变量的函数；
+        /*
+　　　　var g = "全局变量";
+        function fnA() {
+            var a = "A";
+            alert("afadsfsdafsda");
+            fnB();
+            function fnB() {
+                var b = "B";
+                alert(g);//全局变量　在任何函数的任何位置都可以访问．
+                alert(a);//可以访问到a
+                //alert(c);//但不以访问c
+                function fnC() {
+                    var c = "C";
+                    alert(a + "\n" + b);//只要遵循从里向外的原则；
+                }
+            }
+        }
+　　　　fnA();*/
+        /*
+        var a = [];
+        function each() {
+            var i = 0, inner;
+            for (; i < 6; i++) {
+                a.push(function () {
+                    alert(i);
+                });
+            }
+            return a;
+        }
+        var a = each();
+        alert(a);
+        for (var i in a) {
+            //alert(a[i]);
+            a[i]();
+        }*/
+        
+        //使用闭包的话===
+        /*
+        function each() {
+            var i =0 , inner , a = [];
+            for (; i < 10; i++) {
+                cache(i);
+            }
+
+            function cache(i) {
+                a.push(function () {
+                  alert(i);    
+                });
+            }
+            return a;
+        }
+        var a = each();
+        for (var i in a) {
+            a[i]();
+        }
+        each();
+        */
+        //===========================prototype
+        function Demo() {
+            this.toString = 123;
+        }
+        //构造函数A的prototype属性是一个对象
+        //这个对象具有所有属性，A的实例也具有；
+　　　　Demo.prototype={
+            name : "cj",
+            getName : function () {
+                return this.name;
+            }
+        };
+       Demo.prototype.name = "cao";
+       Demo.prototype.getName = "cao";
+       //继承
+       //DemoB.prototype = new DemoA();// B继承A
+        </script>
+    </head>
+    <body>
+    
+    
+    </body>
+</html>

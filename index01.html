@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <title> Script 标签和访问html页面</title>
+            //var btn = document.getElementById("btn");//获取一个html对象．
+            <script type = "text/javascript">
+                window.onload = init; //这样就可以在html之后执行．
+                function init() {
+                    var btn = document.getElementById("btn");
+                    var imgId = document.getElementById("imgId");
+                    var header = document.getElementById("header");
+                    var arr = document.getElementsByTagName("p");//获取标签对象　一组列表；
+      　　　　　　　alert(arr[0]);
+                    arr[0].innerHTML = "第一个p标签";//赋值；
+　　　　　          /*
+                    {
+                        src:"a.jpg",
+                        title:"翻转图像"
+                    }
+                    */
+　　　　　　        btn.value = "按钮";　//改变对象的属性；
+                    //imgId.src = "b.jpg";
+　　　　　　        //imgId.onmouseover = "b.jpg";//使用函数才可以；
+                    imgId.onmouseover = onmouseover;//监听事件需要使用函数才可以正常使用；
+                    header.onmouseover = onmouseover;
+                    function onmouseover() {//可以在该方法中嵌套．
+                        this.src = "b.jpg";
+                        this.className = "basered";
+                    }
+                }
+            </script>
+            <style type="text/css">
+                .basered {
+                    color : red;
+                }
+                .baseyellow {
+                    color : yellow;
+                }
+            </style>
+    </head>
+    <body>
+        <h1> Script 访问HTML页面</h1>
+        <input type = "button" id = "btn" value = "button"　onclick="alert('Alert')"/>
+        <img src = "a.jpg" id ="imgId" title="翻转图像"/><!-- 注意单引号； onmouseover="this.src = 'b.jpg'" -->
+
+        <h2 id = "header" class="baseyellow"> javascript <strong> 标签和访问</strong>
+        <p>获取标签对象</p>
+　　　　<p>获取标签对象</p>
+　　　　<p>获取标签对象</p>
+    </body>
+</html>
+
