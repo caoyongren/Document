@@ -1,0 +1,16 @@
+1.启动模拟器
+ 
+
+2.adb kill-server    用于杀死其他
+
+
+
+3.adb logcat > zx.log         建一个日志文件
+
+
+
+4.然后另外起一个终端：
+	cd  log/
+	tail -f zx.log
+
+现在你去操作  模拟器。

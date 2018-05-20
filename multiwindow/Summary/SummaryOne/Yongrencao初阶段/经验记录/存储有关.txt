@@ -1,0 +1,20 @@
+if (action.equals("com.android.systemui.activitykeyview.pkgname") {
+            Toast.makeText(mContext,"Why do not accept message ,why ?",Toast.LENGTH_LONG).show();
+            String pkgName = intent.getStringExtra("keyAddInfo");
+            Cursor c = mdb.rawQuery("select * from perpo where pkname = ?",
+                    new String[] { pkgName });
+            c.moveToNext();
+            int numbers = c.getInt(c.getColumnIndex("int"));
+            numbers ++ ;
+            ContentValues values = new ContentValues();
+            values.put("int", numbers);
+            mdb.update("perpo", values, "pkname = ?", new String[] { pkgName });
+        }
+
+
+---------------------------------
+ String pkName = intent.getData().getSchemeSpecificPart();
+            MySqliteOpenHelper mMsoh = new MySqliteOpenHelper(context, "Application_database.db",
+                                                              null, 1);
+            SQLiteDatabase db = mMsoh.getWritableDatabase();
+            db.delete("perpo", "pkname = ? ", new String[] { pkName });

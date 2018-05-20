@@ -1,0 +1,8 @@
+
+1.sudo apt install gdebi-core
+
+2.sudo gdebi lantern-installer-beta-64-bit.deb
+
+3.lantern 启动
+使用：
+http://www.zhihu.com/question/40876619

@@ -1,0 +1,70 @@
+From d631d39166efaf0acf2a9a8d387519d6e072f081 Mon Sep 17 00:00:00 2001
+From: Cao Yongren <m18410261910@163.com>
+Date: Mon, 7 Nov 2016 03:44:17 +0000
+Subject: [PATCH] frameworks: base: SystemUI: Showing notification settings
+ when click notification manager on notification panel.
+
+Signed-off-by: Cao Yongren <m18410261910@163.com>
+---
+ AndroidManifest.xml                            | 17 +++++++++++++++++
+ src/com/android/settings/SettingsActivity.java |  3 ++-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index 1d86c49..5aef72a 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -75,6 +75,7 @@
+         android:name="android.permission.REQUEST_SUPERUSER"
+         android:protectionLevel="signature" />
+ 
++
+     <permission
+         android:name="android.permission.REPORT_SUPERUSER"
+         android:protectionLevel="signature" />
+@@ -2065,6 +2066,14 @@
+                 android:label="@string/app_notifications_title"
+                 android:exported="true"
+                 android:taskAffinity="">
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++                <action android:name="com.android.settings.NOTIFICATION_APP_LIST" />
++                <action android:name="android.settings.NOTIFICATION_APP_LIST" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <category android:name="android.intent.category.VOICE_LAUNCH" />
++            </intent-filter>
++
+             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                 android:value="com.android.settings.notification.NotificationAppList" />
+             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+@@ -2243,5 +2252,13 @@
+                 android:value="true" />
+         </activity>
+ 
++        <activity-alias android:name="NotificationAppList"
++                android:exported="true"
++                android:targetActivity="Settings$NotificationAppListActivity">
++            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
++                android:value="com.android.settings.notification.NotificationAppList" />
++            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
++                android:resource="@id/notification_settings" />
++        </activity-alias>
+     </application>
+ </manifest>
+diff --git a/src/com/android/settings/SettingsActivity.java b/src/com/android/settings/SettingsActivity.java
+index a96f711..04dc9f3 100644
+--- a/src/com/android/settings/SettingsActivity.java
++++ b/src/com/android/settings/SettingsActivity.java
+@@ -402,7 +402,8 @@ public class SettingsActivity extends Activity
+             com.koushikdutta.superuser.PolicyNativeFragment.class.getName(),
+             com.android.settings.deviceinfo.Memory.class.getName(),
+             FireWallSettings.class.getName(),
+-            com.android.settings.WallpaperTypeSettings.class.getName()
++            com.android.settings.WallpaperTypeSettings.class.getName(),
++            com.android.settings.notification.NotificationAppList.class.getName()
+     };
+ 
+ 
+-- 
+1.9.1
+

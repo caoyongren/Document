@@ -1,0 +1,35 @@
+９月1日～9月2日
+----------------------------
+为此，请大家在在github上（https://github.com/openthos/openthos/wiki/oto-monthly-plan-201608）
+完成总结报告,具体包括如下内容:
+
+1 完善项目需求和设计报告，包括
+　－　设计实现的具体描述（这是重点），具体要求：其他开发人员能够基于此描述进行重现或进一步改进．
+　－　待实现或解决的feature/bug列表:　当前存在bug的在dev上的列表网址
+　－　当前需求的完善说明　
+
+2 对项目未来如何开展的建议或意见（欢迎就事论事，知无不言）
+　－　包括对当前子项目和总体项目的分析和建议
+　－　一些有用的网络资源链接或信息
+
+
+请参考
+－　设计实现的具体描述：
+　　   https://github.com/openthos/printer-analysis/blob/master/doc/zh/OVREVIEW.md
+　　  　https://github.com/openthos/oto-filemanager-analysis/blob/master/doc/summary/OVERVIEW.md
+     https://github.com/openthos/oto-multiwin-update-analysis/blob/master/Multiwindow-%E7%A7%BB%E6%A4%8D%E6%80%BB%E7%BB%93.md
+　　　
+－　对项目未来如何开展的建议或意见
+　　https://github.com/openthos/openthos/wiki/summary-before-20160115
+
+－　一些有用的网络资源链接或信息
+　　https://github.com/openthos/openthos/wiki/archieves
+　　https://github.com/openthos/openthos/wiki/understand-android
+　　https://github.com/openthos/openthos/wiki/understand-android-x86
+
+
+9月5日～９月9日
+----------------------------
+- fix bug/feature的任务分配和设计实现文档学习和完善
+- fix bug/feature，进一步学习和 技术交流
+

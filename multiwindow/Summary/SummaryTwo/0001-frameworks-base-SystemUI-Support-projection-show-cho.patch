@@ -1,0 +1,226 @@
+From f50d8378caa0677164a3e8a8a4caf5643b992220 Mon Sep 17 00:00:00 2001
+From: Cao Yongren <m18410261910@163.com>
+Date: Wed, 2 Nov 2016 03:00:10 +0000
+Subject: [PATCH] frameworks: base: SystemUI: Support projection show choice
+ item on notification panel.
+
+Signed-off-by: Cao Yongren <m18410261910@163.com>
+---
+ core/java/android/content/Intent.java              |  4 ++
+ packages/SystemUI/res/layout/projection_popup.xml  | 30 +++++++++++++
+ packages/SystemUI/res/values-zh-rCN/strings.xml    |  5 +++
+ packages/SystemUI/res/values/dimens.xml            |  4 ++
+ packages/SystemUI/res/values/strings.xml           |  4 ++
+ .../src/com/android/systemui/qs/QSPanel.java       | 50 ++++++++++++++++++++++
+ .../android/systemui/qs/tiles/ProjectionTile.java  |  7 +++
+ 7 files changed, 104 insertions(+)
+ create mode 100644 packages/SystemUI/res/layout/projection_popup.xml
+
+diff --git a/core/java/android/content/Intent.java b/core/java/android/content/Intent.java
+index 1f030dc..0e1385a 100644
+--- a/core/java/android/content/Intent.java
++++ b/core/java/android/content/Intent.java
+@@ -665,6 +665,10 @@ public class Intent implements Parcelable, Cloneable {
+     public static final String ACTION_SYSTEMUI_SEND_INFO_LOCK
+                          = "com.android.action.SYSTEMUI_INFO_LOCK_SEND";
+ 
++    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
++    public static final String ACTION_NOTIFICATION_PROJECTION
++                         = "com.android.action.SYSTEMUI_NOTIFICITION_SEND";
++
+     /**
+      * A synonym for {@link #ACTION_VIEW}, the "standard" action that is
+      * performed on a piece of data.
+diff --git a/packages/SystemUI/res/layout/projection_popup.xml b/packages/SystemUI/res/layout/projection_popup.xml
+new file mode 100644
+index 0000000..ae8b00d
+--- /dev/null
++++ b/packages/SystemUI/res/layout/projection_popup.xml
+@@ -0,0 +1,30 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="wrap_content"
++    android:layout_height="wrap_content"
++    android:orientation="vertical"
++    >
++    <Button
++        android:text="@string/button_com"
++        android:textSize="20sp"
++        android:id="@+id/button_com"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="center_horizontal"/>
++
++    <Button
++        android:text="@string/button_pro"
++        android:textSize="20sp"
++        android:id="@+id/button_pro"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="center_horizontal"/>
++
++    <Button
++        android:text="@string/button_extend"
++        android:textSize="20sp"
++        android:id="@+id/button_extend"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="center_horizontal"/>
++</LinearLayout>
+diff --git a/packages/SystemUI/res/values-zh-rCN/strings.xml b/packages/SystemUI/res/values-zh-rCN/strings.xml
+index ecb94ee..da223c4 100644
+--- a/packages/SystemUI/res/values-zh-rCN/strings.xml
++++ b/packages/SystemUI/res/values-zh-rCN/strings.xml
+@@ -404,4 +404,9 @@
+     <string name="battery_remaining_string">"剩余时间<xliff:g id="TIME">%1$s</xliff:g>"</string>
+     <string name="charge_remaining_string">"剩余<xliff:g id="TIME">%1$s</xliff:g>充满"</string>
+     <string name="battery_percent">"电池<xliff:g id="TIME">%1$d</xliff:g>"</string>
++    <string name="button_com">仅电脑</string>
++
++    <string name="button_pro">仅投影</string>
++
++    <string name="button_extend">扩展</string>
+ </resources>
+diff --git a/packages/SystemUI/res/values/dimens.xml b/packages/SystemUI/res/values/dimens.xml
+index 8d80250..bc1e3f9 100644
+--- a/packages/SystemUI/res/values/dimens.xml
++++ b/packages/SystemUI/res/values/dimens.xml
+@@ -574,6 +574,10 @@
+     <dimen name="quick_settings_tile_icon_top_padding">3dp</dimen>
+     <!-- Label top padding of Quick Settings Tile -->
+     <dimen name="quick_settings_tile_label_top_padding">2dp</dimen>
++
++    <!-- projection dialog height and width-->
++    <dimen name="popupwindow_width">200dp</dimen>
++    <dimen name="popupwindow_height">150dp</dimen>
+     <!-- Status bar home but width-->
+     <dimen name="status_bar_home_width">10dp</dimen>
+ 
+diff --git a/packages/SystemUI/res/values/strings.xml b/packages/SystemUI/res/values/strings.xml
+index 99d9a7e..7519196 100644
+--- a/packages/SystemUI/res/values/strings.xml
++++ b/packages/SystemUI/res/values/strings.xml
+@@ -36,6 +36,10 @@
+     <!-- Name of print manager -->
+     <string name="print_manager">Print Manager</string>
+ 
++    <string name="button_com">computer</string>
++    <string name="button_pro">projection</string>
++    <string name="button_extend">extend</string>
++
+     <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
+     <string name="app_label">System UI</string>
+ 
+diff --git a/packages/SystemUI/src/com/android/systemui/qs/QSPanel.java b/packages/SystemUI/src/com/android/systemui/qs/QSPanel.java
+index fd2c934..aca01a0 100644
+--- a/packages/SystemUI/src/com/android/systemui/qs/QSPanel.java
++++ b/packages/SystemUI/src/com/android/systemui/qs/QSPanel.java
+@@ -45,6 +45,17 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+ import java.util.ArrayList;
+ import java.util.Collection;
+ 
++import android.widget.PopupWindow;
++import android.view.LayoutInflater;
++import android.widget.Button;
++import android.widget.Toast;
++import android.view.Gravity;
++import android.graphics.Bitmap;
++import android.graphics.drawable.BitmapDrawable;
++import android.content.BroadcastReceiver;
++import android.content.IntentFilter;
++import android.os.UserHandle;
++
+ /** View that represents the quick settings tile panel. **/
+ public class QSPanel extends ViewGroup {
+     private static final float TILE_ASPECT = 0.75f;
+@@ -77,6 +88,7 @@ public class QSPanel extends ViewGroup {
+ 
+     private QSFooter mFooter;
+     private boolean mGridContentVisible = true;
++    private View mView;
+ 
+     public QSPanel(Context context) {
+         this(context, null);
+@@ -110,6 +122,10 @@ public class QSPanel extends ViewGroup {
+                 closeDetail();
+             }
+         });
++        IntentFilter filter = new IntentFilter();
++        filter.addAction(Intent.ACTION_NOTIFICATION_PROJECTION);
++        context.registerReceiverAsUser(mBroadcastReceiver,
++                                UserHandle.ALL, filter, null, null);
+     }
+ 
+     private void updateDetailText() {
+@@ -280,6 +296,7 @@ public class QSPanel extends ViewGroup {
+         final View.OnClickListener click = new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
++                mView = v;
+                 r.tile.click();
+             }
+         };
+@@ -560,4 +577,37 @@ public class QSPanel extends ViewGroup {
+         void onToggleStateChanged(boolean state);
+         void onScanStateChanged(boolean state);
+     }
++
++    // accept info from projectionTile
++    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
++        public void onReceive(Context context, Intent intent) {
++            String action = intent.getAction();
++            if (action.equals(Intent.ACTION_NOTIFICATION_PROJECTION)) {
++                PopupWindow popupWindow;
++                View popupView;
++                Button mButtonCom;
++                popupView = LayoutInflater.from(mContext)
++                            .inflate(R.layout.projection_popup, null);
++                int widthPw = mContext.getResources().getDimensionPixelSize
++                               (R.dimen.popupwindow_width);
++                int heightPw = mContext.getResources().getDimensionPixelSize
++                               (R.dimen.popupwindow_height);
++                popupWindow = new PopupWindow(popupView, widthPw, heightPw);
++                popupWindow.setTouchable(true);
++                popupWindow.setOutsideTouchable(true);
++                popupWindow.setBackgroundDrawable(new
++                            BitmapDrawable(mContext.getResources(), (Bitmap) null));
++                mButtonCom = (Button) popupView.findViewById(R.id.button_com);
++                mButtonCom.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View v) {
++                        Toast.makeText(mContext, "click", Toast.LENGTH_LONG).show();
++                    }
++                });
++                int[] location = new int[2];
++                popupView.getLocationOnScreen(location);
++                popupWindow.showAsDropDown(mView);
++            }
++        }
++    };
+ }
+diff --git a/packages/SystemUI/src/com/android/systemui/qs/tiles/ProjectionTile.java b/packages/SystemUI/src/com/android/systemui/qs/tiles/ProjectionTile.java
+index 576bd0e..0f4f866 100644
+--- a/packages/SystemUI/src/com/android/systemui/qs/tiles/ProjectionTile.java
++++ b/packages/SystemUI/src/com/android/systemui/qs/tiles/ProjectionTile.java
+@@ -37,6 +37,7 @@ public class ProjectionTile extends QSTile<QSTile.BooleanState> {
+ 
+     @Override
+     protected void handleClick() {
++        sendInfoPopup();
+         mBoolean = true;
+         mBooleanState.icon = ResourceIcon.get(R.drawable.ic_notification_projection_on);
+     }
+@@ -53,4 +54,10 @@ public class ProjectionTile extends QSTile<QSTile.BooleanState> {
+             state.icon = ResourceIcon.get(R.drawable.ic_notification_projection_off);
+         }
+     }
++
++    public void sendInfoPopup() {
++        Intent intent = new Intent();
++        intent.setAction(Intent.ACTION_NOTIFICATION_PROJECTION);
++        mContext.sendBroadcast(intent);
++    }
+ }
+-- 
+1.9.1
+

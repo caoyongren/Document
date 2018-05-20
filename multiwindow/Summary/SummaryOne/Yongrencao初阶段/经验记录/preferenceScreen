@@ -1,0 +1,20 @@
+先在res文件夹中新建一个xml文件夹，用来存放preferences.xml文件 
+
+
+
+
+1 先调用onPreferenceClick()方法，如果该方法返回true，则不再调用onPreferenceTreeClick方法 ；
+
+如果onPreferenceClick方法返回false，则继续调用onPreferenceTreeClick方法。
+
+2 onPreferenceChange的方法独立与其他两种方法的运行。也就是说，它总是会运行。
+------------------------------------------------------------------------
+
+http://www.cnblogs.com/lenve/p/4770537.html
+android开发之PreferenceScreen使用详解
+
+Android:persistent 于preferencescreen中有什么用?
+Android中，persistent 于preferencescreen中对布局界面的可控和高效有帮助，具体体现在：
+1、在Android系统源码中，绝大多数应用程序的UI布局采用了Preference的布局结构，而不是平时在模拟器中构建应用程序时使用的View布局结构，例如，Setting模块中布局
+2、FMRadio应用程序中则使用了View布局结构(可能是该应用程序。归根到底，Preference布局结构和View的布局结构本质上还是大同小异；
+3、Preference的优点在于布局界面的可控性和高效率以及可存储值的简洁性(每个PreferenPreferencece存储在相对应下的SharedPreference文件夹下)。

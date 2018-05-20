@@ -1,0 +1,27 @@
+中文（简体）：
+开始键：
+1.开始键点击一次，Common Application语言不会改变，点击第二次才会改为中文;
+2.Software search为英文;
+3.Calibration，Dev Tools，Notes为英文;
+设置：
+4.Jabol，AuotoStart，Run Mode，FireWall,Cloud Service英文;
+jabol 单窗口管理
+autostart 自起管理
+以太网详情：DISCARD，SAVE
+
+我的任务：
+Run Mode，FireWall,Cloud Service
+FireWall详情：最上边“会接入网络的应用列表”，“出站通信”，“入站通信”为中文;
+
+
+5.以太网详情：DISCARD，SAVE;
+6.Jabol详情英文;
+右侧导航：
+7.通知点击两次“没有通知”才改为英文，之后再修改语言为中文或其他，始终为英文;
+  重启后修改语言“没有通知”不变;
+
+英文（US）：
+1.开始键同上第1条;
+Setting：
+2.FireWall详情：最上边“会接入网络的应用列表”，“出站通信”，“入站通信”为中文;
+

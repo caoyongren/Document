@@ -1,0 +1,117 @@
+
+1,通过 ssh lh@192.168.0.180     密码：oto124 登陆服务器
+
+2，目录有你对应名字的文件夹，你的操作位于自己的文件夹下
+   首先，你要代码移植，将你实现的代码移植到服务器端，然后执行相关docker 命令
+3，若没有安装相关的docker，需要先安装（他属于一些配置环境等的集合，用于生成自己的docker环境）。
+   docker var/aosp/source:home/lh/libing  libing-5.1    (docker 相当于一个容器，现在的操作相当于建了一个与你自己目录home/lh/libing 相映射的 var/asop/source 目录（你自己目录下的东西也会出现在其中）-->docker操作在此目录下)
+4，接下来在 就可以启动进去 你的docker
+  docker start -ai libing-5.1
+
+进入相应的multiwindow目录
+  cd var/aosp/source/multiwindow    libing/lolpop-5.1
+5,执行编译代码三部曲
+  1，source build/envsetup.sh  (加载一些编译用的脚本文件)
+  2，lunch  10   （会弹出要求你选择编译成的样式）
+  3，make -jN(n代表线程数) iso_img(这个目的所需的镜像) make -j16 iso_img
+6，此时在目录下会生成相应的iso镜像，然后你从远程服务器端 copy到本地来进行测试（在本地执行就可以,进入到本地android-x86文件夹（6/7步均在该文件夹下进行））
+    scp lh@192.168.0.180:/home/lh/cyr/multiwindow/out/target/product/x86_64/*.iso .
+  
+7，使用qumei启动镜像  进入相应目
+qemu-system-x86_64 --enable-kvm -m 1024 -cdrom android_x86_64.iso -vga cirrus -redir tcp:5555::5555 &
+
+本地跟新代码:
+cd WORKING_DIRECTORY/multiwindow
+
+执行:repo sync   （用以同步代码）
+
+
+取模拟器log相关流程：（log的存放位置，你在什么位置进行操作，issue就存到了什么位置）
+第一步，首先保证模拟器正常启动 （带tcp 端口方式）
+qemu-system-x86_64 --enable-kvm -m 1024 -cdrom ./android_x86_64.iso -redir tcp:5555::5555 &
+   若不成功，执行 adb kill-server  然后在启动模拟器
+第二步，模拟器全部启动后，再次执行 adb kill-server（类似于killall -9 adb    不同点是，killadb会有多个，不确定哪个占用端口呢，kill服务器会更靠谱点）
+然后，启动服务器：adb devices
+准备开启取log模式：adb logcat > issue.log
+最后在另一个窗口：tail -f issue.log (即可看到log信息)
+
+u盘做镜像--真机
+1，sudo fdisk -l
+2，sudo mkfs -t vfat -I /dev/sdb
+3，sudo dd if=androi..iso  of=/dev/sdb
+ 
+
+真机上装apk：
+
+blkid 检测U盘
+mount -t vfat /dev/block/sdb2 /storage/usb0   若无法识别的话，手动挂载
+adb install storage/usb0/apk/...apk    即可安装相应的apk
+
+
+patch 相关，打补丁，与应用补丁
+1，如何就现有补丁部署上去
+   找到补丁文件，放到服务器上某个位置 例如：multiwindow/setupwizard/001.patch
+   001.patch  内容：重要的位置
+   --- a/target/product/core_minimal.mk
+   +++ b/target/product/core_minimal.mk 
+   根据他来决定patch 的-p【N】  N的数值，最前边的a/b是类型，不考虑，，直接比较patch 要应用到的位置与文件中的位置对比
+   规则：-p0  /target/prdocut/core_minimal.mk 路径不变
+         -p1  target/product/core_minaimal.mk
+         
+   后边的路径为相对于当前路径的存放001.patch的位置
+   进入到对应目录：build/此处       target/product/
+   patch -p1 < ../setupwizard/001.patch
+
+正规打patch流程
+1，首先把改动通过git diHEAD  分ff 然后 git commit 提交【git diff > /temp/diff.patch 次方案也可以，但略有差异/git apply diff.patch 可以部署】
+git commit -a -s
+之后通过  git format—patch -M HEAD^   即可以打出以你提交文件名字命名的pathch 包，放在当前跟目录下，也可以 后边跟 -o /temp  ,指定放到什么目录中
+将patch部署到内容中，git am -s (后边跟patch路径)
+
+git log /git history/git log -p（看log的详细信息）
+git push devory multiwindow：refs/heads/multiwindow
+
+合并多个commit
+找到你要合并的commit所有条目的前一个
+git rebase -i 44a62528863bd415c03d9c8915306962538cb4b2
+然后会进入到一个新的编辑页面，
+pick  内容1
+pick  内容2
+pick  内容3
+把后几个pick 改为 squahs/s 然会 ：wq保存
+在git log查看就是新的了
+
+git reset --hard commit号(你要回到的哪一版)
+
+
+建立的docker后，实现路径映射
+libing-5.1
+
+编译不通过需安装条目
+apt-get install bc gettext genisoimage squashfs-tools
+
+
+docker 卡死情况 在服务端
+docker ps  取到开头的ID值
+docker kill Id值即可
+
+
+{
+scp /home/libing/vimtest/EventLogTags.logtags lh@192.168.0.180:/home/lh/ssd/libing/
+
+scp -r /home/libing/vimtest/res lh@192.168.0.180:/home/lh/ssd/libing/
+
+sudo mv  layout lollipop-x86/packages/apps/Settings/res/
+
+scp -r lh@192.168.0.180:/home/lh/cyr/multiwindow/packages/apps/Settings .
+
+ipconfig      /
+scp libing@192.168.0.37://home/libing/vimtest/energy_saving_mode_dialog.xml /tmp/
+
+
+}
+
+
+
+
+

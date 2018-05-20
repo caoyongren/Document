@@ -1,0 +1,71 @@
+CUPS的操作步骤：
+1.启动:sudo cupsd -f
+  输入密码
+
+  在网址中输入：localhost:631
+
+2.另开启一个终端：
+  lp查看所有的lp开头
+ 
+   lpinfo -v
+查看所有的打印机
+
+---
+分析：sh proot.sh /usr/bin/lpstat -r
+sh proot.sh是一个脚本，就是他们为了跨平台写一个脚本库。
+
+因为我的cups是存在的，可直接运行 命令：lpstate -r
+
+3.
+  查看打印设备
+  lpinfo -v -l   
+打印机选择usb的那个.
+选择驱动：
+查看驱动：
+  lpinfo -m
+检索：用lpinfo -m grep
+  选择需要的驱动。例如：lsb/usr/cupsfilters/pxlmono.ppd
+  lpadmin -p cao -v usb://Pantum/P2500W%20series?serial=AA2A000000 -m lsb/usr/cupsfilters/pxlmono.ppd -E
+
+
+
+指令总结：
+    现在可以使用他的虚拟设备，在VMare中运行；
+    proot.sh 是写的一个配置运行环境的脚本。
+1.检测打印机是否运行
+  sh proot.sh/usr/bin/lpstat -r
+2.启动CUPS
+  sh proot.sh /usr/sbin/cupsd -f
+3.关闭cups
+  通过杀死进程。
+
+4.查询可用打印机驱动
+  sh proot.sh lpinfo -m
+
+5.添加打印机--注意name是自定义   url是usb    model是驱动
+  sh proot.sh lpadmin -p name -v url -m model -o printer-is-shared=false -E
+
+6.查询已添加打印机
+  sh proot.sh lpstat -v
+
+7.删除打印机     --printerName就是指自定义的name例如：cao
+  sh proot.sh lpadmin -x printerName
+
+8.恢复打印机
+  sh proot.sh cupsenable PrinterName
+
+9.查询打印任务
+  sh proot.sh sh /jobquery.sh
+
+10.打印  这里的fileName就是：pdf的名字。
+  sh proot.sh lp -d printerName fileName -o 
+  
+
+
+ --------------------
+注意：当出现不能打印时，往往是 驱动问题。
+
+vmware其他：
+chmod 777 namebundle
+sudo namebundle
+

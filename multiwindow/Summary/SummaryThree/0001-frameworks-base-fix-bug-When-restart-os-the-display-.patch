@@ -1,0 +1,101 @@
+From e5018b95be926cdaf09cb74e7de6fa7477d12883 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 2 Jun 2017 08:01:32 +0000
+Subject: [PATCH] frameworks: base: fix bug: When restart os, the display shut
+ down and shut downing.
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ core/res/res/values-en-rGB/strings.xml                          | 2 ++
+ core/res/res/values-zh-rCN/strings.xml                          | 2 ++
+ core/res/res/values/strings.xml                                 | 2 ++
+ core/res/res/values/symbols.xml                                 | 2 ++
+ services/core/java/com/android/server/power/ShutdownThread.java | 9 +++++++--
+ 5 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/core/res/res/values-en-rGB/strings.xml b/core/res/res/values-en-rGB/strings.xml
+index ef6f18d..731da39 100644
+--- a/core/res/res/values-en-rGB/strings.xml
++++ b/core/res/res/values-en-rGB/strings.xml
+@@ -178,6 +178,8 @@
+     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringer vibrate"</string>
+     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringer on"</string>
+     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
++    <string name="reboot_progress">"Reboot�~@</string>
++    <string name="reboot_os">reboot</string>
+     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
+     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Your TV will shut down."</string>
+     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Your watch will shut down."</string>
+diff --git a/core/res/res/values-zh-rCN/strings.xml b/core/res/res/values-zh-rCN/strings.xml
+index 2964af4..ca09fde 100644
+--- a/core/res/res/values-zh-rCN/strings.xml
++++ b/core/res/res/values-zh-rCN/strings.xml
+@@ -174,10 +174,12 @@
+     <string name="turn_off_radio" msgid="8198784949987062346">"关闭无线电"</string>
+     <string name="screen_lock" msgid="799094655496098153">"屏幕锁定"</string>
+     <string name="power_off" msgid="4266614107412865048">"关机"</string>
++    <string name="reboot_os">重启 </string>
+     <string name="silent_mode_silent" msgid="319298163018473078">"振铃器关闭"</string>
+     <string name="silent_mode_vibrate" msgid="7072043388581551395">"振铃器振动"</string>
+     <string name="silent_mode_ring" msgid="8592241816194074353">"振铃器开启"</string>
+     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
++    <string name="reboot_progress">"正在重启...</string>
+     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
+     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的电视即将关闭。"</string>
+     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"您的手表即将关机。"</string>
+diff --git a/core/res/res/values/strings.xml b/core/res/res/values/strings.xml
+index b6469d5..7d752f2 100644
+--- a/core/res/res/values/strings.xml
++++ b/core/res/res/values/strings.xml
+@@ -396,6 +396,7 @@
+ 
+     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. -->
+     <string name="shutdown_progress">Shutting down\u2026</string>
++    <string name="reboot_progress">Reboot \u2026</string>
+ 
+     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
+          be a confirmation dialog.  This is the message. -->
+@@ -418,6 +419,7 @@
+ 
+     <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+     <string name="reboot_safemode_title">Reboot to safe mode</string>
++    <string name="reboot_os">reboot</string>
+ 
+     <!-- Shutdown Confirmation Dialog.  Message in the confirmation dialog
+          when the user asks to reboot into safe mode. [CHAR LIMIT=NONE] -->
+diff --git a/core/res/res/values/symbols.xml b/core/res/res/values/symbols.xml
+index 15fd220..bdb148a 100755
+--- a/core/res/res/values/symbols.xml
++++ b/core/res/res/values/symbols.xml
+@@ -773,6 +773,8 @@
+   <java-symbol type="string" name="postalTypeOther" />
+   <java-symbol type="string" name="postalTypeWork" />
+   <java-symbol type="string" name="power_off" />
++  <java-symbol type="string" name="reboot_os" />
++  <java-symbol type="string" name="reboot_progress"/>
+   <java-symbol type="string" name="preposition_for_date" />
+   <java-symbol type="string" name="preposition_for_time" />
+   <java-symbol type="string" name="print_service_installed_title" />
+diff --git a/services/core/java/com/android/server/power/ShutdownThread.java b/services/core/java/com/android/server/power/ShutdownThread.java
+index da11387..26d84f7 100644
+--- a/services/core/java/com/android/server/power/ShutdownThread.java
++++ b/services/core/java/com/android/server/power/ShutdownThread.java
+@@ -220,8 +220,13 @@ public final class ShutdownThread extends Thread {
+         // throw up an indeterminate system dialog to indicate radio is
+         // shutting down.
+         ProgressDialog pd = new ProgressDialog(context);
+-        pd.setTitle(context.getText(com.android.internal.R.string.power_off));
+-        pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
++        if (mReboot) {
++            pd.setTitle(context.getText(com.android.internal.R.string.reboot_os));
++            pd.setMessage(context.getText(com.android.internal.R.string.reboot_progress));
++        } else {
++            pd.setTitle(context.getText(com.android.internal.R.string.power_off));
++            pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
++        }
+         pd.setIndeterminate(true);
+         pd.setCancelable(false);
+         pd.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+-- 
+1.9.1
+

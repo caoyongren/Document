@@ -1,0 +1,61 @@
+From 8c7e9799715969648ccf40ce7ba4c9572958c190 Mon Sep 17 00:00:00 2001
+From: Cao Yongren <m18410261910@163.com>
+Date: Mon, 7 Nov 2016 03:27:51 +0000
+Subject: [PATCH] frameworks: base: SystemUI: Support notification manager boot
+ notification settings by onClick event.
+
+Signed-off-by: Cao Yongren <m18410261910@163.com>
+---
+ .../android/systemui/statusbar/EmptyShadeView.java | 22 +++++++++++++---------
+ 1 file changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/EmptyShadeView.java b/packages/SystemUI/src/com/android/systemui/statusbar/EmptyShadeView.java
+index aac2623..2318f54 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/EmptyShadeView.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/EmptyShadeView.java
+@@ -22,10 +22,11 @@ import android.util.AttributeSet;
+ import android.view.View;
+ import android.view.animation.Interpolator;
+ import android.widget.TextView;
+-
++import android.content.Intent;
+ import android.widget.Button;
+ import com.android.systemui.R;
+ import com.android.systemui.statusbar.phone.PhoneStatusBar;
++import android.content.ComponentName;
+ 
+ public class EmptyShadeView extends StackScrollerDecorView {
+ 
+@@ -59,18 +60,21 @@ public class EmptyShadeView extends StackScrollerDecorView {
+         btnNotificationManager.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
++                Intent display = new Intent();
++                ComponentName cDisplay = new ComponentName("com.android.settings",
++                                         "com.android.settings.NotificationAppList");
++                display.setComponent(cDisplay);
++                display.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++                getContext().startActivity(display);
+             }
+         });
+ 
+         Button btnClearAll = (Button) findViewById(R.id.clearAll);
+         btnClearAll.setOnClickListener(new View.OnClickListener() {
+-             @Override
+-             public void onClick(View v) {
+-                 mBar.clearAllNotifications();
+-             }
+-       });
+-
++            @Override
++            public void onClick(View v) {
++                mBar.clearAllNotifications();
++            }
++        });
+     }
+-
+-
+ }
+-- 
+1.9.1
+

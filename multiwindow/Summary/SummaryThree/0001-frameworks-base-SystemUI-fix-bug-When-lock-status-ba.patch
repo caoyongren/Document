@@ -1,0 +1,55 @@
+From cf8a99497abba3881236134acdf9a34ea2299285 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Thu, 18 May 2017 03:59:08 +0000
+Subject: [PATCH] frameworks: base: SystemUI: fix bug: When lock status bar
+ then click close button in shut down gui, status bar hide.
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ .../src/com/android/powersource/PowerSourceActivity.java      | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/packages/PowerSource/src/com/android/powersource/PowerSourceActivity.java b/packages/PowerSource/src/com/android/powersource/PowerSourceActivity.java
+index 964e197..b6652d0 100644
+--- a/packages/PowerSource/src/com/android/powersource/PowerSourceActivity.java
++++ b/packages/PowerSource/src/com/android/powersource/PowerSourceActivity.java
+@@ -90,12 +90,18 @@ public class PowerSourceActivity extends Activity implements OnClickListener {
+         sendBroadcast(intent);
+     }
+ 
+-    private void showStatusBar() {
++    private void showStatusBarSuggest() {
+         Intent intent = new Intent();
+         intent.setAction(Intent.STATUS_BAR_SHOW_SUGGEST);
+         sendBroadcast(intent);
+     }
+ 
++    private void showStatusBar() {
++        Intent intent = new Intent();
++        intent.setAction(Intent.STATUS_BAR_SHOW);
++        sendBroadcast(intent);
++    }
++
+     private void hideStatusBar() {
+         Intent intent = new Intent();
+         intent.setAction(Intent.STATUS_BAR_HIDE_MARKLESS);
+@@ -124,7 +130,7 @@ public class PowerSourceActivity extends Activity implements OnClickListener {
+ 
+     @Override
+     public void onClick(View v) {
+-        showStatusBar();
++        showStatusBarSuggest();
+         switch (v.getId()) {
+             case R.id.power_off:
+                 try {
+@@ -165,6 +171,7 @@ public class PowerSourceActivity extends Activity implements OnClickListener {
+                 break;
+             case R.id.power_close:
+                 closeButtonShowStatusBar();
++                showStatusBar();
+                 System.exit(0);
+         }
+     }
+-- 
+1.9.1
+

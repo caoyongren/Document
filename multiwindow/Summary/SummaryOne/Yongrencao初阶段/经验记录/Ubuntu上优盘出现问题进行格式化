@@ -1,0 +1,4 @@
+1.首先要明确盘号。
+
+2.sudo mkfs.vfat -F 32 /dev/sdb1
+    sdb1就是 盘号；

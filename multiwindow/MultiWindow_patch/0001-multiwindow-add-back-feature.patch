@@ -1,0 +1,44 @@
+From a855ee4263a8064f698b306e967d001aaf752159 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 14 Apr 2017 11:11:02 +0800
+Subject: [PATCH] multiwindow add back feature
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ core/java/com/android/internal/policy/PhoneWindow.java | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/core/java/com/android/internal/policy/PhoneWindow.java b/core/java/com/android/internal/policy/PhoneWindow.java
+index d572eba..c81f661 100755
+--- a/core/java/com/android/internal/policy/PhoneWindow.java
++++ b/core/java/com/android/internal/policy/PhoneWindow.java
+@@ -130,6 +130,8 @@ import android.widget.PopupWindow;
+ import android.widget.ProgressBar;
+ import android.widget.TextView;
+ 
++import java.io.IOException;
++import java.lang.Runtime;
+ import java.lang.ref.WeakReference;
+ import java.util.ArrayList;
+ import java.util.List;
+@@ -3921,6 +3923,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                 }
+             });
+ 
++            mBackBtn.setOnClickListener(new OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    try {
++                        Runtime.getRuntime().exec("input keyevent " + KeyEvent.KEYCODE_BACK);
++                    } catch (IOException e) {
++                        Log.e(TAG, "Back button failes", e);
++                    }
++                }
++            });
++
+             //add Listeners
+             mHeader.setOnTouchListener(new TouchListener(new ResizeWindow() {
+                     @Override
+-- 
+2.7.4
+

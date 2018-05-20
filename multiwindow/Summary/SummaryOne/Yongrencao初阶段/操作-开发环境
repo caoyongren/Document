@@ -1,0 +1,112 @@
+1.链接 Docker 服务器
+ssh lh@192.168.0.180
+
+2.启动
+docker start -ai cyr-5.1
+
+3.查看
+ls
+4.进入我的文件夹
+cd cyr
+
+
+5.创建文件夹
+mkdir multiwindow
+6.repo初始化
+repo init -u git://192.168.0.185/lollipop-x86/manifest.git -b multiwindow
+
+7.同步下载代码
+repo sync
+
+
+8.打镜像
+source build/envsetup.sh
+
+9.选择 
+lunch  --10
+
+10.编译
+make -j16 iso_img
+
+11.将服务端的镜像下载：
+    （查看路径：进入自己的文件夹：使用pwd指令
+     然后添加out/target/product/x86_64/*.iso .
+      ）
+    scp lh@192.168.0.180:/home/lh/cyr/multiwindow/out/target/product/x86_64/*.iso .
+12.没有安装qumei先安装
+	sudo apt-get install qemu
+13.启动镜像
+qemu-system-x86_64 --enable-kvm -m 1024 -cdrom android_x86_64.iso -vga cirrus -redir tcp:5555::5555 &
+
+这里可以进行选择：模拟器  或   真机
+
+14.进入编辑环境
+   1.进入本地的，就是进入到文件夹找到类，进行编辑。
+   2.进入服务器端：
+  	
+
+
+15.
+u盘做镜像--真机
+1，sudo fdisk -l
+2，sudo mkfs -t vfat -I /dev/sdb
+3，sudo dd if=androi..iso  of=/dev/sdb
+
+
+16.规范格式
+
+17.使用git打补丁
+
+18.给测试报告
+
+19.使用  git stash      进行 清空
+
+20.git log -p  查看补丁提交记录
+
+21.repo sync   重新档代码
+
+22.如果  进行修改后  没有提交 补丁，那就不要 repo 代码。
+
+
+
+
+
+注意：
+    sudo fdisk -l是选择  优盘
+    查看到自己优盘的 名字： 例如--/dev/sdb1
+    sudo dd if=android_x86_64.iso of=/dev/sdb   进行写入；
+   ( Disk /dev/sdb: 14.4 GiB, 15502147584 bytes, 30277632 sectors )
+
+然后在真机上插入优盘  进行启动，
+在选择上，最后的一个GRUB上选择 NO其他选择 YES.
+------------------
+进入包：cd packages
+ls进行查看 里面的所有包；
+进入一个包中：cd apps
+ls查看：
+选择一个类
+进入编辑某一个类：
+例如：
+vim src/com/android/settings/AutoStartSettings.java
+
+-------------------------
+注意：
+每次打开都要执行一次 exit的退出操作。
+编辑思路：--如果没有下载镜像，则要下载镜像。
+	1.链接Docker服务器
+        2.repo初始化
+        3.同步代码
+        4.执行编译脚本
+        5.决定编译目标
+        6.make -j16 iso_img
+        7.进入包后选择，类进行编辑。
+      也要用scp方式放到本地，
+      从本地进入：选则自己的文件夹，然后执行那句scp的语言
+      最后进行：启动模拟器。
+   用android studio进行 代码提示。
+      
+        
+	
+
+
+

@@ -1,0 +1,321 @@
+一. ubuntu 的基本使用
+
+必备快捷方式：
+   1.Alt + Tab  切换窗口
+   
+   2.Alt + ctrl + T 开启终端
+
+   3.全屏是 F11
+  
+终端命令：
+
+1.安装软件：sudo apt-get -f install XXX 
+
+2.卸载软件：sudo apt-get remove XXX
+
+3.更新软件：sudo apt-get update XXX
+
+4.安装安装包
+  sudo dpkg -i package.deb
+
+5.解压
+  unzip XXX.zip
+
+  TAR
+  tar -xvf archive_name.tar 
+ 
+  tar -zxvf archive_name.tar.gz
+
+6.文件操作
+  cd name 进入文件夹
+  
+  rm name.txt 删除文件
+
+     rm -r name 递归删除子目录
+
+  vim name.txt 编辑文件
+
+  cat XXX      查看文件
+
+  
+
+7.与服务器的文件操作
+  
+  cp XXX /home/file/cao路经      复制（本地）在要复制文件的目录下。
+
+  将本地拷贝到 服务器（本地）
+  scp /home/larno/dialog_system_upgrade.xml lh@192.168.0.180:/tmp
+
+  将 文件/文件夹 从本地拷至远程 Ubuntu 机(scp)
+  scp -r localfile.txt username@192.168.0.1:/home/username/
+
+  从服务器拷贝文件/文件夹（本地）
+  scp -r lh@192.168.0.180:/home/lh/cyr/multiwindow/packages/apps/Settings .
+
+
+8.vim 的使用
+
+  :q      退出
+
+  :q!     强制退出
+
+  :wq      保存后退出
+
+  :set number 显示行号
+
+
+  操作中的必须要掌握的快捷键：
+  非编辑状态
+
+  gg 双击   置顶
+
+  shift + g  置地
+
+  dd        删除一行
+
+  ctrl +f   翻页
+
+  /xx       检索 enter
+  检索到 按 n  键  找下一个
+
+  ctrl + a    移动到行首
+
+  ctrl + e    移动到行尾
+
+  ctrl +  c    终止
+
+  set number   显示行号
+
+  cd ~          返回到根目录
+  
+  shift + *  ;   查找
+
+     检索文件
+     grep -rni "/<status_bar_activity_contents/>"   可以根据一个xml中的id ，检索到 那个类。
+  -----------------
+  进入编辑状态  i 
+
+  Tab  键补全
+
+  上 /  下  翻记忆
+
+  工作目录；
+  1.pwd    显示工作目录
+  
+  2.ls -F  查看目录的文件
+
+  3.ls -I   显示文件
+
+  4.ls -a   显示隐藏文件
+
+  5.mkdir   创建文件夹
+
+关于权限
+
+  sudo chmod 600 XXX  所有都具有读写权限
+
+  sudo chmod 644 xxx   同上但组用户  只有读
+
+  sudo chmod 700 XXX    只有所有者有权限
+ 
+  sudo chmod 777  xxx    每个人
+
+  例如：
+       /home$    sudo chmod 777 ./file   给某个文件夹赋予权限。
+
+
+系统操作
+
+    1.shutdown -h now  关机
+
+    2.reboot   重启
+
+    3./prec/cpuInfo        查看 cpu 信息
+
+      /prec/menuInfo        内存
+
+--------------------------------------------------------------------------
+二.git  的使用
+
+1.打补丁的基本流程：     (位置   base#   Setting#  可以  （通常是packages的上一级）)
+  1.git diff    查看修改
+
+  2.git status  查看状态(是否有新的文件)
+
+     3.对新建的 例如一个.xml  进行提交
+       git add  name
+       例如：
+           git add res/layout/dialog_system_upgrade.xml
+  4.git status  再查看 则由  红变  为 绿色。
+
+  5.  git commit -a -s   写 补丁描述
+      
+       android_code/frameworks/base# git commit -a -s
+      例如：
+          写补丁的描述：
+                      frameworks: base: StartMenu: Add freature
+    
+                      Add right click fixed to the taskbar feature.
+          出现：
+          [cyr 73e520a] frameworks: base: StartMenu: Add freature
+          2 files changed, 52 insertions(+), 1 deletion(-)
+ 
+
+       6.  git diff 表示检测 是否 还有没提交的。 
+   
+  6.git format-patch -M HEAD^  打补丁
+      例如：
+          ~/cyr/android_code/frameworks/base# git format-patch -M HEAD^
+          生成：0001-frameworks-base-StartMenu-Add-freature.patch
+  8.cp复制补丁，就是将补丁 复制到 cyr下。
+      例如：
+          ~/cyr/android_code/frameworks/base# cp 0001-frameworks-base-StartMenu-Add-freature.patch ../../../
+       技巧：选中 安滚轮;
+  9. git log -p     查看最近提交 补丁。      
+      ~/cyr/android_code/frameworks/base# git log -p   
+
+  10 git reset HEAD^      如果有错误这是进行  重做。
+
+2.创建分支 和 切换分支
+  
+   创建分支user2/i18n
+   创建分支:执行git branch <branchname>命令创建新分支
+   切换分支:执行git checkout <branchname>命令切换到新分支
+
+3.git clone  下载全部
+
+4. 
+----------------------------------------------------------------
+
+三.Log  调试
+
+   1.启动模拟器
+ 
+   2.adb kill-server    用于杀死其他
+
+   3.adb logcat > zx.log         建一个日志文件
+
+   4.然后另外起一个终端：
+	cd  log/
+	tail -f zx.log
+
+   现在你去操作  模拟器。
+-----------------------------
+四.操作步骤
+   1. ssh lh@192.168.0.180 
+   密码：oto124
+   2.docker start -ai cyr-5.1
+   
+   3.查看
+     ls
+   4.进入我的文件夹
+     cd cyr
+
+   5.创建文件夹
+     mkdir android_code
+
+   6.repo 初始化
+     repo init -u git://192.168.0.185/lollipop-x86/manifest.git -b android_code
+
+   7.同步下载代码
+     repo sync
+
+   8.打镜像
+     source build/envsetup.sh
+
+   9.选择
+     lunch  10
+
+   10.编译
+     make -j16 iso_img
+
+
+   11.将服务端的镜像下载：
+    （查看路径：进入自己的文件夹：使用pwd指令
+     然后添加out/target/product/x86_64/*.iso .
+      ）
+    scp lh@192.168.0.180:/home/lh/cyr/multiwindow/out/target/product/x86_64/*.iso .
+   12.没有安装qumei先安装
+	sudo apt-get install qemu
+   
+   13.启动镜像
+   qemu-system-x86_64 --enable-kvm -m 1024 -cdrom android_x86_64.iso -vga cirrus -redir     tcp:5555::5555 &   
+   
+    14.真机测试
+      1.sudo fdisk -l
+
+      2.sudo dd if=android_iso of=/dev/sdb
+
+      3.sudo mkfs -t vfat -I /dev/sdb    格式化
+
+
+16.规范格式
+
+17.使用git打补丁
+
+18.给测试报告
+
+19.使用  git stash      进行 清空
+
+20.git log -p  查看补丁提交记录
+
+21.repo sync   重新档代码
+
+22.如果  进行修改后  没有提交 补丁，那就不要 repo 代码。
+-----------------------------
+五.Android 环境配置
+   1.JDK 安装
+       $sudo apt-get update
+       $sudo apt-get install openjdk-8-jdk
+   2.AndroidStudio 安装
+       $sudo apt-add-repository ppa:paolorotolo/android-studio
+       $sudo apt-get update
+       $sudo apt-get install android-studio
+   最后，就是通过软件搜索：android studio  
+   启动studio  然后就是 studio的操作，默认下载SDK.
+------
+六.Ubuntu系统的安装注意几点：
+   1.在装之前要清空一个磁盘
+
+   2.注意查看磁盘的是动态 or 静态。  （需要是静态）
+
+   3.注意分区；详细看这个：http://www.cnblogs.com/pangguoming/p/4584846.html
+
+   
+
+   
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+  

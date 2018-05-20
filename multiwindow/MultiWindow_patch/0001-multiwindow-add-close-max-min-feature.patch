@@ -1,0 +1,569 @@
+From 0eb5d6a050415484ca3b2ac58b9b06d4f89f7e35 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 14 Apr 2017 09:46:01 +0800
+Subject: [PATCH] multiwindow add close max min feature
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ core/java/android/app/ActivityManagerNative.java   | 92 ++++++++++++++++++++++
+ core/java/android/app/IActivityManager.java        | 27 +++++++
+ core/java/android/view/ViewRootImpl.java           |  2 +-
+ .../com/android/internal/policy/PhoneWindow.java   | 57 ++++++++++++++
+ .../com/android/internal/statusbar/IStatusBar.aidl |  5 ++
+ .../android/systemui/statusbar/CommandQueue.java   | 25 ++++++
+ .../systemui/statusbar/phone/PhoneStatusBar.java   | 35 ++++++++
+ .../android/systemui/statusbar/tv/TvStatusBar.java |  9 +++
+ .../android/server/am/ActivityManagerService.java  | 73 +++++++++++++++++
+ .../server/statusbar/StatusBarManagerInternal.java |  3 +
+ .../server/statusbar/StatusBarManagerService.java  | 21 +++++
+ 11 files changed, 348 insertions(+), 1 deletion(-)
+
+diff --git a/core/java/android/app/ActivityManagerNative.java b/core/java/android/app/ActivityManagerNative.java
+index 34bee01..ce559f2 100755
+--- a/core/java/android/app/ActivityManagerNative.java
++++ b/core/java/android/app/ActivityManagerNative.java
+@@ -2618,6 +2618,46 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
+             reply.writeInt(res ? 1 : 0);
+             return true;
+         }
++
++        /**
++         * Date: Aug 28, 2014
++         * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++         *
++         * Close activity in window
++         */
++        case CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION: {
++            data.enforceInterface(IActivityManager.descriptor);
++            int stackId = data.readInt();
++            boolean[] ret = new boolean[1];
++            ret[0] = closeActivity(stackId);
++            reply.writeNoException();
++            reply.writeBooleanArray(ret);
++            return true;
++        }
++
++        case STATUSBAR_ACTIVITY_SAVEINFO: {
++            data.enforceInterface(IActivityManager.descriptor);
++            int stackId = data.readInt();
++            Rect r = new Rect();
++            r.readFromParcel(data);
++            saveInfoInStatusbarActivity(stackId, r);
++            reply.writeNoException();
++            return true;
++        }
++
++        /**
++         * Date: Aug 28, 2014
++         * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++         *
++         * Get maximized size of application in window
++         */
++        case GET_MAXIMIZED_WINDOW_SIZE_TRANSACTION: {
++            data.enforceInterface(IActivityManager.descriptor);
++            Rect r = getMaximizedWindowSize();
++            r.writeToParcel(reply, 0);
++            reply.writeNoException();
++            return true;
++        }
+         }
+ 
+         return super.onTransact(code, data, reply, flags);
+@@ -6050,5 +6090,57 @@ class ActivityManagerProxy implements IActivityManager
+         return res == 1;
+     }
+ 
++    /**
++     * Date: Feb 25, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Close activity in window
++     */
++    public boolean closeActivity(int stackId) throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        data.writeInt(stackId);
++        mRemote.transact(CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION, data, reply, 0);
++        reply.readException();
++        boolean[] ret = new boolean[1];
++        reply.readBooleanArray(ret);
++        data.recycle();
++        reply.recycle();
++        return ret[0];
++    }
++
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        data.writeInt(stackId);
++        int flags = 0;
++        rect.writeToParcel(data, flags);
++        mRemote.transact(STATUSBAR_ACTIVITY_SAVEINFO, data, reply, 0);
++        reply.readException();
++        data.recycle();
++        reply.recycle();
++    }
++
++    /**
++     * Date: Aug 28, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Getter for custom maximized window size.
++     */
++    public Rect getMaximizedWindowSize() throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        mRemote.transact(GET_MAXIMIZED_WINDOW_SIZE_TRANSACTION, data, reply, 0);
++        Rect screen = new Rect();
++        screen.readFromParcel(reply);
++        reply.readException();
++        data.recycle();
++        reply.recycle();
++        return screen;
++    }
++
+     private IBinder mRemote;
+ }
+diff --git a/core/java/android/app/IActivityManager.java b/core/java/android/app/IActivityManager.java
+index ae0580a..747ccef 100755
+--- a/core/java/android/app/IActivityManager.java
++++ b/core/java/android/app/IActivityManager.java
+@@ -623,6 +623,30 @@ public interface IActivityManager extends IInterface {
+         }
+     }
+ 
++    /**
++     * Date: Aug 28, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Close application in window.
++     *
++     * @param stackId identifies stack (stackbox id)
++     * @return true on success
++     * @throws RemoteException
++     */
++    public boolean closeActivity(int stackId) throws RemoteException;
++
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) throws RemoteException;
++
++    /**
++     * Date: Aug 28, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Getter for custom maximized window size of application.
++     *
++     * @return Rect of window
++     */
++    public Rect getMaximizedWindowSize() throws RemoteException;
++
+     String descriptor = "android.app.IActivityManager";
+ 
+     // Please keep these transaction codes the same -- they are also
+@@ -808,6 +832,9 @@ public interface IActivityManager extends IInterface {
+     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
+     int SET_PROCESS_MEMORY_TRIM_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+186;
+     int RELAYOUT_WINDOW_CORNERSTONE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+187;
++    int STATUSBAR_ACTIVITY_SAVEINFO = IBinder.FIRST_CALL_TRANSACTION+188;
++    int GET_MAXIMIZED_WINDOW_SIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+189;
++    int CLOSE_ACTIVITY_WITH_WINDOW_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+190;
+ 
+     // Start of L transactions
+     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
+diff --git a/core/java/android/view/ViewRootImpl.java b/core/java/android/view/ViewRootImpl.java
+index 8ef4e07..c533ab7 100755
+--- a/core/java/android/view/ViewRootImpl.java
++++ b/core/java/android/view/ViewRootImpl.java
+@@ -261,7 +261,7 @@ public final class ViewRootImpl implements ViewParent,
+     final DisplayAdjustments mDisplayAdjustments;
+ 
+     // These are accessed by multiple threads.
+-    final Rect mWinFrame; // frame given by window manager.
++    public final Rect mWinFrame; // frame given by window manager.
+ 
+     final Rect mPendingOverscanInsets = new Rect();
+     final Rect mPendingVisibleInsets = new Rect();
+diff --git a/core/java/com/android/internal/policy/PhoneWindow.java b/core/java/com/android/internal/policy/PhoneWindow.java
+index 4bd1076..d572eba 100755
+--- a/core/java/com/android/internal/policy/PhoneWindow.java
++++ b/core/java/com/android/internal/policy/PhoneWindow.java
+@@ -3864,6 +3864,63 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+             mIntentLineRect.setComponent(new ComponentName(LINERECT_LOCATION, LINERECT_ACTIVITY));
+             String packageName = setMWWindowTitle(root);
+ 
++            mMaximizeBtn.setOnClickListener(new OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    Rect actualWindowSize = new Rect(mDecor.getViewRootImpl().mWinFrame);
++                    try {
++                        Rect customMaximizedWindowSize = ActivityManagerNative.getDefault().getMaximizedWindowSize();
++                        if (!customMaximizedWindowSize.equals(new Rect())) {
++                            mFullScreen = customMaximizedWindowSize;
++                        } else {
++                            mFullScreen = new Rect(0, 0, metrics.widthPixels, metrics.heightPixels);
++                        }
++                        if (!actualWindowSize.equals(mFullScreen)){
++                            mOldSize = actualWindowSize;
++                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mFullScreen);
++                            actualWindowSize = mFullScreen;
++                        } else {
++                            if (mOldSize == null) {
++                                mOldSize = new Rect(mDecor.getViewRootImpl().mWinFrame);
++                            }
++                            actualWindowSize = mOldSize;
++                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mOldSize);
++                        }
++                    } catch (RemoteException e) {
++                        Log.e(TAG, "Maximize failed", e);
++                    }
++                }
++            });
++
++            mMinimizeBtn.setOnClickListener(new OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    Rect actualWindowSize = new Rect(mDecor.getViewRootImpl().mWinFrame);
++                    Rect outOfScreen = new Rect(actualWindowSize.left + metrics.widthPixels,
++                                                actualWindowSize.top + metrics.heightPixels,
++                                                actualWindowSize.right + metrics.widthPixels,
++                                                actualWindowSize.bottom + metrics.heightPixels);
++                    try {
++                        ActivityManagerNative.getDefault().saveInfoInStatusbarActivity(getStackIdForMultiwindow(), actualWindowSize);
++                        ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), outOfScreen);
++                    } catch (RemoteException e) {
++                        Log.e(TAG, "Minimize failed", e);
++                    }
++                    // unsetFocusedStack();
++                }
++            });
++
++            mCloseBtn.setOnClickListener(new OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    try {
++                        ActivityManagerNative.getDefault().closeActivity(getStackIdForMultiwindow());
++                    } catch (RemoteException e) {
++                        Log.e(TAG, "Close button failes", e);
++                    }
++                }
++            });
++
+             //add Listeners
+             mHeader.setOnTouchListener(new TouchListener(new ResizeWindow() {
+                     @Override
+diff --git a/core/java/com/android/internal/statusbar/IStatusBar.aidl b/core/java/com/android/internal/statusbar/IStatusBar.aidl
+index ba67cf4..eff1fd6 100755
+--- a/core/java/com/android/internal/statusbar/IStatusBar.aidl
++++ b/core/java/com/android/internal/statusbar/IStatusBar.aidl
+@@ -18,6 +18,7 @@ package com.android.internal.statusbar;
+ 
+ import android.os.Bundle;
+ import android.service.notification.StatusBarNotification;
++import android.graphics.Rect;
+ 
+ import com.android.internal.statusbar.StatusBarIcon;
+ 
+@@ -76,5 +77,9 @@ oneway interface IStatusBar
+      * @param source the identifier for the gesture, see {@link StatusBarManager}
+      */
+     void onCameraLaunchGestureDetected(int source);
++
++    void saveInfoInStatusbarActivity(int stackId, in Rect rect);
++
++    void removeStatusbarActivity(int stackId);
+ }
+ 
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java b/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
+index 897f5e5..f57210a 100755
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
+@@ -21,6 +21,7 @@ import android.os.Handler;
+ import android.os.IBinder;
+ import android.os.Message;
+ import android.util.Pair;
++import android.graphics.Rect;
+ 
+ import com.android.internal.statusbar.IStatusBar;
+ import com.android.internal.statusbar.StatusBarIcon;
+@@ -65,6 +66,8 @@ public class CommandQueue extends IStatusBar.Stub {
+     private static final int MSG_ASSIST_DISCLOSURE          = 22 << MSG_SHIFT;
+     private static final int MSG_START_ASSIST               = 23 << MSG_SHIFT;
+     private static final int MSG_CAMERA_LAUNCH_GESTURE      = 24 << MSG_SHIFT;
++    private static final int MSG_SAVEINFO_STATUSBAR_ACTIVITY      = 25 << MSG_SHIFT;
++    private static final int MSG_REMOVE_STATUSBAR_ACTIVITY  = 26 << MSG_SHIFT;
+ 
+     public static final int FLAG_EXCLUDE_NONE = 0;
+     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
+@@ -111,6 +114,8 @@ public class CommandQueue extends IStatusBar.Stub {
+         public void showAssistDisclosure();
+         public void startAssist(Bundle args);
+         public void onCameraLaunchGestureDetected(int source);
++        public void saveInfoInStatusbarActivity(int stackId, Rect rect);
++        public void removeStatusbarActivity(int stackId);
+     }
+ 
+     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
+@@ -240,6 +245,20 @@ public class CommandQueue extends IStatusBar.Stub {
+         }
+     }
+ 
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) {
++        synchronized (mList) {
++            // don't coalesce these
++            mHandler.obtainMessage(MSG_SAVEINFO_STATUSBAR_ACTIVITY, stackId, 0,  rect).sendToTarget();
++        }
++    }
++
++    public void removeStatusbarActivity(int stackId) {
++        synchronized (mList) {
++            // don't coalesce these
++            mHandler.obtainMessage(MSG_REMOVE_STATUSBAR_ACTIVITY, stackId).sendToTarget();
++        }
++    }
++
+     public void notificationLightOff() {
+         synchronized (mList) {
+             mHandler.sendEmptyMessage(MSG_NOTIFICATION_LIGHT_OFF);
+@@ -404,6 +423,12 @@ public class CommandQueue extends IStatusBar.Stub {
+                 case MSG_CAMERA_LAUNCH_GESTURE:
+                     mCallbacks.onCameraLaunchGestureDetected(msg.arg1);
+                     break;
++                case MSG_SAVEINFO_STATUSBAR_ACTIVITY:
++                    mCallbacks.saveInfoInStatusbarActivity(msg.arg1, (Rect)msg.obj);
++                    break;
++                case MSG_REMOVE_STATUSBAR_ACTIVITY:
++                    mCallbacks.removeStatusbarActivity((int)msg.obj);
++                    break;
+             }
+         }
+     }
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+index 73361bd..c8451d8 100755
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+@@ -153,6 +153,7 @@ import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+ import com.android.systemui.statusbar.policy.UserInfoController;
+ import com.android.systemui.statusbar.policy.UserSwitcherController;
+ import com.android.systemui.statusbar.policy.ZenModeController;
++//import com.android.systemui.statusbar.policy.ActivityKeyView;
+ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
+ import com.android.systemui.statusbar.stack.StackStateAnimator;
+@@ -2377,6 +2378,40 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+         }
+     }
+ 
++    /*
++    public int findStatusbarActivityByStackId(int stackId) {
++        for (int i = 0; i< mStatusBarActivities.getChildCount(); i++) {
++           if (mStatusBarActivities.getChildAt(i) instanceof ActivityKeyView) {
++                ActivityKeyView kbv = (ActivityKeyView) mStatusBarActivities.getChildAt(i);
++                if(kbv.getStatusbarActivity().mStackId == stackId) {
++                    return i;
++                }
++            }
++        }
++        return -1;
++    }
++    */
++
++    @Override // CommandQueue
++    public void removeStatusbarActivity(int stackId) {
++        //int idx = findStatusbarActivityByStackId(stackId);
++        //if(idx >= 0) {
++        //    if(!((ActivityKeyView) mStatusBarActivities.getChildAt(idx)).getStatusbarActivity().mIsDocked) {
++        //        mStatusBarActivities.removeView((ActivityKeyView) mStatusBarActivities.getChildAt(idx));
++        //    } else {
++        //        ((ActivityKeyView) mStatusBarActivities.getChildAt(idx)).activityClosed();
++        //    }
++        //}
++    }
++
++    @Override // CommandQueue
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) {
++        //int idx = findStatusbarActivityByStackId(stackId);
++        //if(idx >= 0) {
++        //    ((ActivityKeyView) mStatusBarActivities.getChildAt(idx)).saveStackInfo(rect);
++        //}
++    }
++
+     @Override
+     public void notificationLightOff() {
+         if (mDozeServiceHost != null) {
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
+index bbe5dd9..31d2fe0 100755
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
+@@ -20,6 +20,7 @@ import android.os.IBinder;
+ import android.service.notification.NotificationListenerService.RankingMap;
+ import android.service.notification.StatusBarNotification;
+ import android.view.View;
++import android.graphics.Rect;
+ 
+ import com.android.internal.statusbar.StatusBarIcon;
+ import com.android.systemui.statusbar.ActivatableNotificationView;
+@@ -186,4 +187,12 @@ public class TvStatusBar extends BaseStatusBar {
+     protected boolean isSnoozedPackage(StatusBarNotification sbn) {
+         return false;
+     }
++
++    @Override // CommandQueue
++    public void removeStatusbarActivity(int stackId) {
++    }
++
++    @Override // CommandQueue
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) {
++    }
+ }
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index ccce471..283d5ed 100755
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -439,6 +439,15 @@ public final class ActivityManagerService extends ActivityManagerNative
+     // devices.
+     private boolean mShowDialogs = true;
+ 
++    /**
++     * Date: Aug 29, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Variable for keeping size of maximized window of application window if not set,
++     * and kept as new Rect(), maximized window is taken from metrics height and width.
++     */
++    private Rect mMaximizedWindowSize = new Rect();
++
+     BroadcastQueue mFgBroadcastQueue;
+     BroadcastQueue mBgBroadcastQueue;
+     // Convenient for easy iteration over the queues. Foreground is first
+@@ -20778,4 +20787,68 @@ public final class ActivityManagerService extends ActivityManagerNative
+             }
+         }
+     }
++
++    private void removeStatusbarActivity(int stackId) {
++        StatusBarManagerInternal statusBarManager = LocalServices.getService(StatusBarManagerInternal.class);
++        statusBarManager.removeStatusbarActivity(stackId);
++        //mStatusbarActivities.remove((Integer)stackId);
++    }
++
++    private boolean closeActivity(int stackId, boolean individual, int activities) {
++        boolean succeed;
++
++        // synchronized (mSBAThread) {
++            if(individual && activities == 0) {
++                removeStatusbarActivity(stackId);
++            }
++        // }
++
++        if (!individual) {
++            return true;
++        }
++
++        /* FIXME: may memory leak which is missed by finishActivity()?? */
++        long ident = Binder.clearCallingIdentity();
++        StackInfo stack = getStackInfo(stackId);
++        if (stack != null) {
++            for (int next = stack.taskIds.length - 1; next >= 0; --next) {
++                removeTask(stack.taskIds[next]);
++            }
++            succeed = true;
++        } else {
++            succeed = false;
++        }
++        Binder.restoreCallingIdentity(ident);
++        return succeed;
++    }
++
++    /**
++     * Date: Aug 28, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Method for closing application by stackbox id and closing their tasks.
++     */
++    @Override
++    public boolean closeActivity(int stackId) {
++        return closeActivity(stackId, true, 0);
++    }
++
++    @Override
++    public void saveInfoInStatusbarActivity(int stackId, Rect rect) {
++        //synchronized (mSBAThread) {
++            StatusBarManagerInternal statusBarManager = LocalServices.getService(StatusBarManagerInternal.class);
++            statusBarManager.saveInfoInStatusbarActivity(stackId, rect);
++        //}
++    }
++
++    /**
++     * Date: Aug 29, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Getter for custom maximized window size of maximize button on window
++     */
++    @Override
++    public Rect getMaximizedWindowSize() {
++        return mMaximizedWindowSize;
++    }
+ }
+diff --git a/services/core/java/com/android/server/statusbar/StatusBarManagerInternal.java b/services/core/java/com/android/server/statusbar/StatusBarManagerInternal.java
+index 25d646d..692b0d8 100755
+--- a/services/core/java/com/android/server/statusbar/StatusBarManagerInternal.java
++++ b/services/core/java/com/android/server/statusbar/StatusBarManagerInternal.java
+@@ -17,6 +17,7 @@
+ package com.android.server.statusbar;
+ 
+ import android.os.Bundle;
++import android.graphics.Rect;
+ 
+ import com.android.server.notification.NotificationDelegate;
+ 
+@@ -29,4 +30,6 @@ public interface StatusBarManagerInternal {
+     void showAssistDisclosure();
+     void startAssist(Bundle args);
+     void onCameraLaunchGestureDetected(int source);
++    void removeStatusbarActivity(int stackId);
++    void saveInfoInStatusbarActivity(int stackId, Rect rect);
+ }
+diff --git a/services/core/java/com/android/server/statusbar/StatusBarManagerService.java b/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
+index e9ace29..64d5e6e 100755
+--- a/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
++++ b/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
+@@ -27,6 +27,7 @@ import android.content.Context;
+ import android.content.pm.PackageManager;
+ import android.content.res.Resources;
+ import android.util.Slog;
++import android.graphics.Rect;
+ 
+ import com.android.internal.statusbar.IStatusBar;
+ import com.android.internal.statusbar.IStatusBarService;
+@@ -186,6 +187,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
+                 }
+             }
+         }
++
++        @Override
++        public void saveInfoInStatusbarActivity(int stackId, Rect rect) {
++            if (mBar != null) {
++                try {
++                    mBar.saveInfoInStatusbarActivity(stackId, rect);
++                } catch (RemoteException e) {
++                }
++            }
++        }
++
++        @Override
++        public void removeStatusbarActivity(int stackId) {
++            if (mBar != null) {
++                try {
++                    mBar.removeStatusbarActivity(stackId);
++                } catch (RemoteException e) {
++                }
++            }
++        }
+     };
+ 
+     // ================================================================================
+-- 
+2.7.4
+

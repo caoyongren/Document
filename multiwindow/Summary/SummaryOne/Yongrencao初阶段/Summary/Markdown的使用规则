@@ -1,0 +1,54 @@
+1.标题：
+  #一级标题	##二级标题	###三级标题
+
+2.使用html  实现 居中，和改变字体的颜色和大小：
+  如果需要居中显示：<center></center>
+  改变字体的大小和颜色:<font color='red' size='8'></font>
+   font {font-weight:bold;font-style:italic;}
+
+
+3.列表
+  1.
+  2.
+  3.
+
+
+4.引用
+  > 这里写引用的内容。
+
+5.图片和链接
+  ！[](url.img)
+   ![](url)
+
+6.表格
+  
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+
+
+也可以是使用  html 的 标签来写；
+
+
+7.分割线    ***
+
+
+8.嵌入代码
+首先要有在`的前面空格四个
+然后，`code`
+-------------------------------------------------------------------------
+9.设置字体的高亮
+mark {
+ 7             background-color:#00ff90; font-weight:bold;
+ 8         }
+
+
+10.**加粗 **
+
+
+
+
+11.<hr> 画横线
+

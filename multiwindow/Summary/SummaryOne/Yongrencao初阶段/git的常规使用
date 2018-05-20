@@ -1,0 +1,100 @@
+1.在写好代码后查看代码是否 符合代码风格(当前分支下例如：Settings)
+
+git status   查看修改的状态 
+
+git diff      是否符合格式（修改的文件）
+
+git commit     提交    
+
+
+     在git  status时，如果出现红色，则表示新建的没有提交，则需要  git add
+
+2.创建分支 和 切换分支
+  
+   创建分支user2/i18n
+   创建分支:执行git branch <branchname>命令创建新分支
+   切换分支:执行git checkout <branchname>命令切换到新分支
+   
+   git checkout -b user2/i18n
+   创建和切换到新的分支。
+
+
+3.打补丁
+  --------------------------------------
+    创建分支：
+    1.git checkout -b cyr  (注意位置：也就是仓库是  SystemUI  Setting  (packages 下一级))
+    2.git branch 查看分支
+    
+  打补丁的基本流程：     (位置   base#   Setting#  可以  （通常是packages的上一级）)
+  1.git diff    查看修改
+
+  2.git status  查看状态(是否有新的文件)
+
+     3.对新建的 例如一个.xml  进行提交
+       git add  name
+       例如：
+           git add res/layout/dialog_system_upgrade.xml
+  4.git status  再查看 则由  红变  为 绿色。
+
+  5.  git commit -a -s   写 补丁描述
+      
+       android_code/frameworks/base# git commit -a -s
+      例如：
+          写补丁的描述：
+                      frameworks: base: StartMenu: Add freature
+    
+                      Add right click fixed to the taskbar feature.
+          出现：
+          [cyr 73e520a] frameworks: base: StartMenu: Add freature
+          2 files changed, 52 insertions(+), 1 deletion(-)
+ 
+
+       6.  git diff 表示检测 是否 还有没提交的。 
+   
+  6.git format-patch -M HEAD^  打 补丁
+      例如：
+          ~/cyr/android_code/frameworks/base# git format-patch -M HEAD^
+          生成：0001-frameworks-base-StartMenu-Add-freature.patch
+  8.cp复制补丁，就是将补丁 复制到 cyr下。
+      例如：
+          ~/cyr/android_code/frameworks/base# cp 0001-frameworks-base-StartMenu-Add-freature.patch ../../../
+       技巧：选中 安滚轮;
+  9. git log -p     查看最近提交 补丁。      
+      ~/cyr/android_code/frameworks/base# git log -p   
+
+  10 git reset HEAD^      如果有错误这是进行  重做。  就是 在之前没有commit的基础上再修改。
+
+
+
+11.git branch -D name   删除分支
+------------------
+问题：
+    当你没有建分支，然后操作后，重新开始
+    --git status 
+      git checkout -Modify
+
+     
+    当你分支不能repo最新的代码时，可以进行在repo 后，再新建分支
+    在新的分支中就有啦！
+下载代码：
+git  clone  是指全部；
+
+
+
+--复制代码：
+  cp  原  新
+  例如:              在documentsui中进行 复制一个 caoyongruiexercise.java
+  com/android/documentsui# cp IconUtils.java caoyongruiexercise.java
+   
+
+
+
+
+
+
+
+
+
+
+
+

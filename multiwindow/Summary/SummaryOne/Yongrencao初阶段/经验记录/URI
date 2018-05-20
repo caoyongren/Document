@@ -1,0 +1,40 @@
+Uri就是 android  内部资源的定位
+通用资源标志符（Universal Resource Identifier, 简称"URI"）。
+Android系统提供了两个用于操作Uri的工具类，分别为UriMatcher 和ContentUris 
+
+
+
+使用方法如下。
+首先第一步，初始化：
+
+UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);  
+ 
+第二步注册需要的Uri:
+
+matcher.addURI("com.yfz.Lesson", "people", PEOPLE);  
+matcher.addURI("com.yfz.Lesson", "person/#", PEOPLE_ID);  
+
+第三部，与已经注册的Uri进行匹配:
+Uri uri = Uri.parse("content://" + "com.yfz.Lesson" + "/people");  
+int match = matcher.match(uri);  
+       switch (match)  
+       {  
+           case PEOPLE:  
+               return "vnd.android.cursor.dir/people";  
+           case PEOPLE_ID:  
+               return "vnd.android.cursor.item/people";  
+           default:  
+               return null;  
+       }  
+
+match方法匹配后会返回一个匹配码Code，即在使用注册方法addURI时传入的第三个参数。
+ 
+上述方法会返回"vnd.android.cursor.dir/person".
+-----------------------------------------------------
+
+
+
+
+
+
+

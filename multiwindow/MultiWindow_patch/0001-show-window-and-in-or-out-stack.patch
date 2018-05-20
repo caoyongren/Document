@@ -1,0 +1,459 @@
+From c81060319b946cd0eb165e6c34c35172361dd504 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Thu, 13 Apr 2017 21:51:41 +0800
+Subject: [PATCH] show window and in or out stack
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ core/java/android/app/ActivityManagerNative.java   | 42 ++++++++++++++
+ core/java/android/app/IActivityManager.java        |  4 +-
+ .../android/server/am/ActivityManagerService.java  | 20 ++++++-
+ .../java/com/android/server/am/ActivityStack.java  | 41 +++++++++++++-
+ .../android/server/am/ActivityStackSupervisor.java | 66 ++++++++++++++++------
+ .../java/com/android/server/am/TaskRecord.java     |  6 +-
+ .../java/com/android/server/wm/DisplayContent.java | 12 ++++
+ .../core/java/com/android/server/wm/TaskStack.java | 18 +++++-
+ .../android/server/wm/WindowManagerService.java    | 12 ++++
+ .../java/com/android/server/wm/WindowState.java    |  6 +-
+ 10 files changed, 200 insertions(+), 27 deletions(-)
+
+diff --git a/core/java/android/app/ActivityManagerNative.java b/core/java/android/app/ActivityManagerNative.java
+index 8a6905e..34bee01 100755
+--- a/core/java/android/app/ActivityManagerNative.java
++++ b/core/java/android/app/ActivityManagerNative.java
+@@ -2412,6 +2412,24 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
+             return true;
+         }
+ 
++        /**
++          * Date: Feb 25, 2014
++          * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++          *
++          * Change window position
++         **/
++        case RELAYOUT_WINDOW_CORNERSTONE_TRANSACTION: {
++            data.enforceInterface(IActivityManager.descriptor);
++            int stackId = data.readInt();
++            Rect r = new Rect();
++            r.readFromParcel(data);
++            boolean[] ret = new boolean[1];
++            ret[0] = relayoutWindow(stackId, r);
++            reply.writeNoException();
++            reply.writeBooleanArray(ret);
++            return true;
++         }
++
+         case SET_TASK_RESIZEABLE_TRANSACTION: {
+             data.enforceInterface(IActivityManager.descriptor);
+             int taskId = data.readInt();
+@@ -3424,6 +3442,30 @@ class ActivityManagerProxy implements IActivityManager
+         data.recycle();
+         reply.recycle();
+     }
++
++    /**
++      * Date: Feb 25, 2014
++      * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++      *
++      * Change window position
++     */
++    @Override
++    public boolean relayoutWindow(int stackId, Rect r) throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        data.writeInt(stackId);
++        int flags = 0;
++        r.writeToParcel(data, flags);
++        mRemote.transact(RELAYOUT_WINDOW_CORNERSTONE_TRANSACTION, data, reply, 0);
++        reply.readException();
++        boolean[] ret = new boolean[1];
++        reply.readBooleanArray(ret);
++        data.recycle();
++        reply.recycle();
++        return ret[0];
++    }
++
+     @Override
+     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException
+     {
+diff --git a/core/java/android/app/IActivityManager.java b/core/java/android/app/IActivityManager.java
+index be5294d..ae0580a 100755
+--- a/core/java/android/app/IActivityManager.java
++++ b/core/java/android/app/IActivityManager.java
+@@ -457,6 +457,8 @@ public interface IActivityManager extends IInterface {
+ 
+     public void performIdleMaintenance() throws RemoteException;
+ 
++    public boolean relayoutWindow(int stackId, Rect r) throws RemoteException;
++
+     public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
+             IActivityContainerCallback callback) throws RemoteException;
+ 
+@@ -805,7 +807,7 @@ public interface IActivityManager extends IInterface {
+     int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
+     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
+     int SET_PROCESS_MEMORY_TRIM_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+186;
+-
++    int RELAYOUT_WINDOW_CORNERSTONE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+187;
+ 
+     // Start of L transactions
+     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 39728bd..ccce471 100755
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -2721,7 +2721,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+             ActivityStack stack = mStackSupervisor.getStack(stackId);
+             if (stack != null) {
+                 ActivityRecord r = stack.topRunningActivityLocked(null);
+-                if (r != null) {
++                if (r != null && !r.isHomeActivity()) {
+                     setFocusedActivityLocked(r, "setFocusedStack");
+                     mStackSupervisor.resumeTopActivitiesLocked(stack, null, null);
+                 }
+@@ -8892,6 +8892,24 @@ public final class ActivityManagerService extends ActivityManagerNative
+     }
+ 
+     @Override
++    public boolean relayoutWindow(int stackId, Rect r) {
++           /**
++            * Date: Feb 25, 2014
++            * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++            *
++            * TietoTODO: add posibility to relayout only own window
++            */
++           long ident = Binder.clearCallingIdentity();
++           try {
++               Slog.v(TAG, "RelayoutWindow: " + stackId + " pos:" + r);
++               mWindowManager.relayoutWindow(stackId, r);
++           } finally {
++               Binder.restoreCallingIdentity(ident);
++           }
++           return true;
++    }
++
++    @Override
+     public void moveTaskBackwards(int task) {
+         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
+                 "moveTaskBackwards()");
+diff --git a/services/core/java/com/android/server/am/ActivityStack.java b/services/core/java/com/android/server/am/ActivityStack.java
+index 6e34876..baa1e76 100755
+--- a/services/core/java/com/android/server/am/ActivityStack.java
++++ b/services/core/java/com/android/server/am/ActivityStack.java
+@@ -226,6 +226,8 @@ final class ActivityStack {
+     // Whether or not this stack covers the entire screen; by default stacks are full screen
+     boolean mFullscreen = true;
+ 
++    boolean mIsMultiwindowStack = false;
++
+     long mLaunchStartTime = 0;
+     long mFullyDrawnStartTime = 0;
+ 
+@@ -1282,6 +1284,25 @@ final class ActivityStack {
+         boolean behindFullscreen = !isStackVisibleLocked();
+         boolean noStackActivityResumed = (isInStackLocked(starting) == null);
+ 
++        /**
++         * Date: Aug 7, 2014
++         * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++         *
++         * Stack is behindFullscreen, but maybe it isn't. When mw app is launched
++         * from app, than Home is shown in background instead of this particualar
++         * app. Below lines check if non-Home stack is above Home stack.
++         */
++        /**if (behindFullscreen) {
++            for (ActivityStack as : mStackSupervisor.getStacks()) {
++                if (as == this) {
++                    break;
++                } else if (as.isHomeStack()) {
++                    behindFullscreen = false;
++                    break;
++                }
++            }
++        }**/
++
+         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+             final TaskRecord task = mTaskHistory.get(taskNdx);
+             final ArrayList<ActivityRecord> activities = task.mActivities;
+@@ -2637,7 +2658,6 @@ final class ActivityStack {
+                     }
+                 }
+             }
+-
+             final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+             if (top != null) {
+                 mService.setFocusedActivityLocked(top, myReason);
+@@ -4385,6 +4405,25 @@ final class ActivityStack {
+                 + " stackId=" + mStackId + ", " + mTaskHistory.size() + " tasks}";
+     }
+ 
++    /**
++     * Date: Apr 23, 2014
++     * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++     *
++     * Check check if stack is contains activities which run in window.
++     */
++    public boolean isMultiwindowStack() {
++        return mIsMultiwindowStack;
++    }
++
++    public void setMultiwindowStack(boolean isMultiwindow) {
++        setMultiwindowStack(isMultiwindow, false);
++    }
++
++    public void setMultiwindowStack(boolean isMultiwindow, boolean isFullscreen){
++        mIsMultiwindowStack = isMultiwindow;
++        mFullscreen = isFullscreen;
++    }
++
+     boolean updateOverrideConfiguration(Configuration newConfig) {
+         Configuration oldConfig = mOverrideConfig;
+         mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
+diff --git a/services/core/java/com/android/server/am/ActivityStackSupervisor.java b/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+index fe2f73c..f8065a4 100755
+--- a/services/core/java/com/android/server/am/ActivityStackSupervisor.java
++++ b/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+@@ -42,6 +42,7 @@ import android.Manifest;
+ import android.app.Activity;
+ import android.app.ActivityManager;
+ import android.app.ActivityManager.StackInfo;
++import android.app.ActivityManagerNative;
+ import android.app.ActivityOptions;
+ import android.app.AppGlobals;
+ import android.app.AppOpsManager;
+@@ -1778,34 +1779,56 @@ public final class ActivityStackSupervisor implements DisplayListener {
+                 return stack;
+             }
+ 
+-            final ActivityContainer container = r.mInitialActivityContainer;
+-            if (container != null) {
+-                // The first time put it on the desired stack, after this put on task stack.
+-                r.mInitialActivityContainer = null;
+-                return container.mStack;
++            /**
++             * add the function to get the flag about multiwindow
++             */
++            boolean isMultiwindow = false;
++            try {
++                isMultiwindow = ActivityManagerNative.getDefault().multiwindowEnabled();
++            } catch (RemoteException e) {
+             }
+ 
+-            if (mFocusedStack != mHomeStack && (!newTask ||
+-                    mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
+-                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+-                        "computeStackFocus: Have a focused stack=" + mFocusedStack);
+-                return mFocusedStack;
+-            }
++            /**
++             * Date: Feb 27, 2014
++             * Copyright (C) 2014 Tieto Poland Sp. z o.o.
++             *
++             * TietoTODO: this loop returns first stack which is not a homestack
++             * Use the same stack for regular apps (non multiwindow).
++             */
++            if(!isMultiwindow){
++                final ActivityContainer container = r.mInitialActivityContainer;
++                if (container != null) {
++                    // The first time put it on the desired stack, after this put on task stack.
++                    r.mInitialActivityContainer = null;
++                    return container.mStack;
++                }
+ 
+-            final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
+-            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+-                stack = homeDisplayStacks.get(stackNdx);
+-                if (!stack.isHomeStack()) {
++                if (mFocusedStack != mHomeStack && (!newTask ||
++                        mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
+                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+-                            "computeStackFocus: Setting focused stack=" + stack);
+-                    return stack;
++                            "computeStackFocus: Have a focused stack=" + mFocusedStack);
++                    return mFocusedStack;
++                }
++
++                final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
++                for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
++                    stack = homeDisplayStacks.get(stackNdx);
++                    if (!stack.isHomeStack()) {
++                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
++                                "computeStackFocus: Setting focused stack=" + stack);
++                        return stack;
++                    }
+                 }
+             }
+ 
+             // Need to create an app stack for this user.
+             stack = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
+             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
+-                    + r + " stackId=" + stack.mStackId);
++                      + r + " stackId=" + stack.mStackId);
++            stack.setMultiwindowStack(isMultiwindow);
++            if(isMultiwindow){
++                   relayoutTinyWindow(stack.mStackId,isMultiwindow,false);
++            }
+             return stack;
+         }
+         return mHomeStack;
+@@ -1825,6 +1848,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
+         return true;
+     }
+ 
++   final private void relayoutTinyWindow(int stackId, boolean isMultiwindow, boolean runFullScreen){
++        int edge = (int)(Math.random() * 300);
++        Rect defaultRandomRect = new Rect(edge, edge, 800 + edge, 600 + edge);
++        Slog.d("umic","relayout window " + defaultRandomRect.toString() +  "stack Id " +  stackId );
++        mService.relayoutWindow(stackId, defaultRandomRect);
++    }
++
+     final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
+             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
+             boolean doResume, Bundle options, TaskRecord inTask) {
+diff --git a/services/core/java/com/android/server/am/TaskRecord.java b/services/core/java/com/android/server/am/TaskRecord.java
+index 9da30bf..6f4ec09 100755
+--- a/services/core/java/com/android/server/am/TaskRecord.java
++++ b/services/core/java/com/android/server/am/TaskRecord.java
+@@ -287,7 +287,8 @@ final class TaskRecord {
+         mNextAffiliateTaskId = nextTaskId;
+         mCallingUid = callingUid;
+         mCallingPackage = callingPackage;
+-        mResizeable = resizeable;
++        //mResizeable = resizeable;
++        mResizeable = true;
+         mPrivileged = privileged;
+     }
+ 
+@@ -387,7 +388,8 @@ final class TaskRecord {
+         } else {
+             autoRemoveRecents = false;
+         }
+-        mResizeable = info.resizeable;
++        //mResizeable = info.resizeable;
++        mResizeable = true;
+         mLockTaskMode = info.lockTaskLaunchMode;
+         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
+         setLockTaskAuth();
+diff --git a/services/core/java/com/android/server/wm/DisplayContent.java b/services/core/java/com/android/server/wm/DisplayContent.java
+index ad1e95f..2bef06f 100755
+--- a/services/core/java/com/android/server/wm/DisplayContent.java
++++ b/services/core/java/com/android/server/wm/DisplayContent.java
+@@ -221,6 +221,18 @@ class DisplayContent {
+         mContentRect.set(contentRect);
+     }
+ 
++    boolean relayoutStack(int stackId, Rect pos) {
++        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
++            final TaskStack stack = mStacks.get(stackNdx);
++            if (stack.mStackId == stackId) {
++                // stack.setCrappyRelayouted(true);
++                layoutNeeded = true;
++                return stack.setBoundsByForce(pos);
++             }
++         }
++         return false;
++    }
++
+     int stackIdFromPoint(int x, int y) {
+         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+             final TaskStack stack = mStacks.get(stackNdx);
+diff --git a/services/core/java/com/android/server/wm/TaskStack.java b/services/core/java/com/android/server/wm/TaskStack.java
+index 8e7c241..6536197 100755
+--- a/services/core/java/com/android/server/wm/TaskStack.java
++++ b/services/core/java/com/android/server/wm/TaskStack.java
+@@ -133,8 +133,23 @@ public class TaskStack {
+         }
+     }
+ 
++    private boolean isHomeStack() {
++        TaskStack stack = mDisplayContent.getHomeStack();
++        if ((stack != null) && (stack.mStackId == mStackId) ||  mStackId == 0) {
++            return true;
++        }
++        return false;
++    }
++
++    boolean setBoundsByForce(Rect bounds) {
++        mDimLayer.setBounds(bounds);
++        mAnimationBackgroundSurface.setBounds(bounds);
++        mBounds.set(bounds);
++        return true;
++    }
++
+     /** Set the stack bounds. Passing in null sets the bounds to fullscreen. */
+-    boolean setBounds(Rect bounds) {// Matthew null == fullscreen;
++    boolean setBounds(Rect bounds) {
+         boolean oldFullscreen = mFullscreen;
+         int rotation = Surface.ROTATION_0;
+         if (mDisplayContent != null) {
+@@ -143,6 +158,7 @@ public class TaskStack {
+             if (bounds == null) {
+                 bounds = mTmpRect;
+                 mFullscreen = true;
++                if(!isHomeStack())mFullscreen = false;
+             } else {
+                 // ensure bounds are entirely within the display rect
+                 if (!bounds.intersect(mTmpRect)) {
+diff --git a/services/core/java/com/android/server/wm/WindowManagerService.java b/services/core/java/com/android/server/wm/WindowManagerService.java
+index f63213f..49f554a 100755
+--- a/services/core/java/com/android/server/wm/WindowManagerService.java
++++ b/services/core/java/com/android/server/wm/WindowManagerService.java
+@@ -5274,6 +5274,18 @@ public class WindowManagerService extends IWindowManager.Stub
+             return new Configuration(stack.mOverrideConfig);
+         }
+     }
++    public boolean relayoutWindow(int stackId, Rect pos) {
++        synchronized (mWindowMap) {
++            final int numDisplays = mDisplayContents.size();
++            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
++                 if (mDisplayContents.valueAt(displayNdx).relayoutStack(stackId, pos)) {
++                         performLayoutAndPlaceSurfacesLocked();
++                         return true;
++                      }
++                  }
++              }
++         return false;
++     }
+ 
+     public void getStackBounds(int stackId, Rect bounds) {
+         synchronized (mWindowMap) {
+diff --git a/services/core/java/com/android/server/wm/WindowState.java b/services/core/java/com/android/server/wm/WindowState.java
+index c2548de..084516b 100755
+--- a/services/core/java/com/android/server/wm/WindowState.java
++++ b/services/core/java/com/android/server/wm/WindowState.java
+@@ -610,6 +610,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
+         mDecorFrame.set(dcf);
+         mStableFrame.set(sf);
+         final boolean hasOutsets = osf != null;
++        Slog.d("umic","has out sets " + osf);
+         if (hasOutsets) {
+             mOutsetFrame.set(osf);
+         }
+@@ -632,14 +633,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
+             w = Math.min(w, pw);
+             h = Math.min(h, ph);
+         }
+-
++        Slog.d("umic"," w = " + w +" h = " + h);
+         Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
+                 (int) (x + mAttrs.horizontalMargin * pw),
+                 (int) (y + mAttrs.verticalMargin * ph), mFrame);
+-
+         // Now make sure the window fits in the overall display frame.
+         Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
+-
+         // Calculate the outsets before the content frame gets shrinked to the window frame.
+         if (hasOutsets) {
+             mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
+@@ -649,6 +648,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
+         } else {
+             mOutsets.set(0, 0, 0, 0);
+         }
++        Slog.d("umic","outSets set as " + mOutsets);
+ 
+         // Make sure the content and visible frames are inside of the
+         // final window frame.
+-- 
+2.7.4
+

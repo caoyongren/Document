@@ -1,0 +1,120 @@
+From de7be65398b16eaea78e208b78ef8e5c7dad425a Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 14 Apr 2017 12:49:31 +0800
+Subject: [PATCH] Multiwindow use resizeStack instead of relayoutWindow
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ core/java/com/android/internal/policy/PhoneWindow.java        | 10 +++++-----
+ .../java/com/android/server/am/ActivityManagerService.java    | 11 ++++++-----
+ .../java/com/android/server/am/ActivityStackSupervisor.java   |  3 ++-
+ 3 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/core/java/com/android/internal/policy/PhoneWindow.java b/core/java/com/android/internal/policy/PhoneWindow.java
+index c81f661..05f3536 100755
+--- a/core/java/com/android/internal/policy/PhoneWindow.java
++++ b/core/java/com/android/internal/policy/PhoneWindow.java
+@@ -3793,7 +3793,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                                     || mNewFrame == mRightDockFrame) {
+                                 sendNewFrame(Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN);
+                             } else {
+-                                ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mNewFrame);
++                                ActivityManagerNative.getDefault().resizeStack(getStackIdForMultiwindow(), mNewFrame);
+                             }
+                         }
+                     } catch (RemoteException e) {
+@@ -3806,7 +3806,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                     if (mResizeWays != MW_WINDOW_RESIZE_NONE || mNewFrame == mLeftDockFrame
+                             || mNewFrame == mRightDockFrame) {
+                         try {
+-                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mNewFrame);
++                            ActivityManagerNative.getDefault().resizeStack(getStackIdForMultiwindow(), mNewFrame);
+                             mNewFrame = NO_FRAME;
+                             sendNewFrame(Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN);
+                             ActivityManagerNative.getDefault().setFocusedStack(getStackIdForMultiwindow());
+@@ -3879,14 +3879,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                         }
+                         if (!actualWindowSize.equals(mFullScreen)){
+                             mOldSize = actualWindowSize;
+-                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mFullScreen);
++                            ActivityManagerNative.getDefault().resizeStack(getStackIdForMultiwindow(), mFullScreen);
+                             actualWindowSize = mFullScreen;
+                         } else {
+                             if (mOldSize == null) {
+                                 mOldSize = new Rect(mDecor.getViewRootImpl().mWinFrame);
+                             }
+                             actualWindowSize = mOldSize;
+-                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mOldSize);
++                            ActivityManagerNative.getDefault().resizeStack(getStackIdForMultiwindow(), mOldSize);
+                         }
+                     } catch (RemoteException e) {
+                         Log.e(TAG, "Maximize failed", e);
+@@ -3904,7 +3904,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                                                 actualWindowSize.bottom + metrics.heightPixels);
+                     try {
+                         ActivityManagerNative.getDefault().saveInfoInStatusbarActivity(getStackIdForMultiwindow(), actualWindowSize);
+-                        ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), outOfScreen);
++                        ActivityManagerNative.getDefault().resizeStack(getStackIdForMultiwindow(), outOfScreen);
+                     } catch (RemoteException e) {
+                         Log.e(TAG, "Minimize failed", e);
+                     }
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 283d5ed..6aa4bc6 100755
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -2732,6 +2732,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+                 ActivityRecord r = stack.topRunningActivityLocked(null);
+                 if (r != null && !r.isHomeActivity()) {
+                     setFocusedActivityLocked(r, "setFocusedStack");
++                    if (r.isHomeActivity() && multiwindowEnabled()) return;
+                     mStackSupervisor.resumeTopActivitiesLocked(stack, null, null);
+                 }
+             }
+@@ -8650,8 +8651,8 @@ public final class ActivityManagerService extends ActivityManagerNative
+ 
+     @Override
+     public void resizeTask(int taskId, Rect bounds) {
+-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+-                "resizeTask()");
++        //enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
++        //        "resizeTask()");
+         long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (this) {
+@@ -9013,9 +9014,9 @@ public final class ActivityManagerService extends ActivityManagerNative
+     }
+ 
+     @Override
+-    public void resizeStack(int stackId, Rect bounds) {//Change to size 
+-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+-                "resizeStack()");
++    public void resizeStack(int stackId, Rect bounds) {
++        //enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
++        //        "resizeStack()");
+         long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (this) {
+diff --git a/services/core/java/com/android/server/am/ActivityStackSupervisor.java b/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+index f8065a4..70776d1 100755
+--- a/services/core/java/com/android/server/am/ActivityStackSupervisor.java
++++ b/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+@@ -24,6 +24,7 @@ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
++import static android.content.Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN;
+ import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+ import static com.android.server.am.ActivityManagerDebugConfig.*;
+@@ -1852,7 +1853,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
+         int edge = (int)(Math.random() * 300);
+         Rect defaultRandomRect = new Rect(edge, edge, 800 + edge, 600 + edge);
+         Slog.d("umic","relayout window " + defaultRandomRect.toString() +  "stack Id " +  stackId );
+-        mService.relayoutWindow(stackId, defaultRandomRect);
++        mService.resizeStack(stackId, defaultRandomRect);
+     }
+ 
+     final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
+-- 
+2.7.4
+

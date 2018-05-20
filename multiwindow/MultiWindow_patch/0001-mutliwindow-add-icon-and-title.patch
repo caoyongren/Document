@@ -1,0 +1,88 @@
+From 57e1e85c26b1e1020915238ef836e6016740390d Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 14 Apr 2017 09:23:26 +0800
+Subject: [PATCH] mutliwindow add icon and title
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ .../com/android/internal/policy/PhoneWindow.java   | 49 +++++++++++++++++++++-
+ 1 file changed, 48 insertions(+), 1 deletion(-)
+
+diff --git a/core/java/com/android/internal/policy/PhoneWindow.java b/core/java/com/android/internal/policy/PhoneWindow.java
+index dd78056..4bd1076 100755
+--- a/core/java/com/android/internal/policy/PhoneWindow.java
++++ b/core/java/com/android/internal/policy/PhoneWindow.java
+@@ -27,6 +27,10 @@ import android.animation.Animator;
+ import android.animation.ObjectAnimator;
+ import android.app.ActivityManagerNative;
+ import android.app.SearchManager;
++import android.content.pm.ApplicationInfo;
++import android.content.ComponentName;
++import android.content.pm.PackageManager;
++import android.content.pm.PackageManager.NameNotFoundException;
+ import android.os.Build;
+ import android.os.UserHandle;
+ 
+@@ -3858,6 +3862,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+ 
+             mIntentLineRect = new Intent();
+             mIntentLineRect.setComponent(new ComponentName(LINERECT_LOCATION, LINERECT_ACTIVITY));
++            String packageName = setMWWindowTitle(root);
+ 
+             //add Listeners
+             mHeader.setOnTouchListener(new TouchListener(new ResizeWindow() {
+@@ -3870,8 +3875,50 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+                         return mTmpFrame;
+                     }
+                 }, mFullScreen));
++        }
++
++        private String setMWWindowTitleDefault(ViewGroup root) {
++            TextView appName = (TextView)root.findViewById(com.android.internal.R.id.mwTitle);
++            ImageView appIcon = (ImageView)root.findViewById(com.android.internal.R.id.mwIcon);
++
++            PackageManager pm = getContext().getPackageManager();
++            ApplicationInfo ai = getContext().getApplicationInfo();
++            Drawable icon = ai.loadIcon(pm);
++            appName.setText(pm.getApplicationLabel(ai));
++            appIcon.setImageDrawable(icon);
++            return ai.packageName;
++        }
++
++        private String setMWWindowTitleByPkg(ViewGroup root, String pkg) {
++            try {
++                PackageManager pm = getContext().getPackageManager();
++                final ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
++                if (ai != null) {
++                    TextView appName = (TextView)root.findViewById(com.android.internal.R.id.mwTitle);
++                    ImageView appIcon = (ImageView)root.findViewById(com.android.internal.R.id.mwIcon);
++
++                    appName.setText(pm.getApplicationLabel(ai));
++                    appIcon.setImageDrawable(pm.getApplicationIcon(ai));
++                    return pkg;
++                }
++            } catch (NameNotFoundException e) {
++            }
++            return setMWWindowTitleDefault(root);
++        }
+ 
+-           }
++        private String setMWWindowTitle(ViewGroup root) {
++           try {
++                List<ActivityManager.RunningTaskInfo> tasks = ActivityManagerNative.getDefault().getTasks(20, 0);
++                for (int idx = tasks.size() - 1; idx >= 0; --idx) {
++                    ActivityManager.RunningTaskInfo task = tasks.get(idx);
++                    if (task.id == getTaskId()) {
++                        return setMWWindowTitleByPkg(root, task.baseActivity.getPackageName());
++                    }
++                }
++            } catch (RemoteException e) {
++            }
++            return setMWWindowTitleDefault(root);
++        }
+     }
+ 
+     protected ViewGroup generateLayout(DecorView decor) {
+-- 
+2.7.4
+

@@ -1,0 +1,50 @@
+8月31号
+1.桌面图标的排序
+  使用系统的方法：
+  Collections.sort(resolveInfo, new ResolveInfo.DisplayNameComparator(pm));
+  在X_86系统上出现的问题是：中文—-英文
+  
+  尝试：使用 
+  Comparator<Object> comparator = Collator.getInstance(java.util.Locale.CHINA);
+    Arrays.sort(strInfo,comparator);
+  eclipse上可以，但是x_86上依然没有效果。   只出现 一个应用图标。
+ 
+  尝试：使用
+  Comparator<Object> comparator = Collator.getInstance(java.util.Locale.CHINA);
+    Collections.sort(list,comparator);
+  没有效果。  中文--英文
+
+  这时发现，这些方法都是：系统的方法，在x_86上都是 没有效果。
+
+  尝试写：比较器--结果--也是  中--英
+  public class AppNameComparator implements Comparator<ResolveInfo>{
+        private Context context ;
+        PackageManager pm = context.getPackageManager();
+
+        @Override
+        public int compare(ResolveInfo resolveInfo, ResolveInfo resovle) {
+            Collator collator = Collator.getInstance(Locale.CHINA);
+            String strInfo = resolveInfo.loadLabel(pm).toString();
+            String str = resovle.loadLabel(pm).toString();
+            if (collator.compare(strInfo,str) > 0) {
+                return 1;
+            } else if (collator.compare(strInfo,str) < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+   最后，使用把  应用的名字，分 数字  英语  汉语
+   三次分开，分别放入 不同的集合。
+   这样分开进行使用系统的排序进行排序。
+   
+   测试可以。
+   这样，就发现：自己一开始就该尝试这种方法，因为，自己没有去注意：
+         中文是有序的，英文也是有序。
+         所以，分开的尝试应该是首选。
+经验：要懂得在 bug  出发现问题，解决问题。
+-----------------------------------------------
+  
+  

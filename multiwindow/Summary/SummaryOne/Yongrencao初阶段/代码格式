@@ -1,0 +1,54 @@
+1.注意空格
+   注意空格。
+   代码距离外边框   4个空格
+       下一级也是 空4个空格
+   统一级别 是对齐。
+
+2.长度
+  不超过 80字符
+
+
+
+3.括号中有两个参数  逗号后要加 空格。
+ launchIntent.setComponent(new ComponentName(pkgName, activityName));
+
+
+4. 注意空格，就是：if  else  （）的前后 都要有空格。
+
+  if (ch >= ASCII_NUMBER_MIN && ch <= ASCII_NUMBER_MAX) {
+                    listNumber.add(info);
+                } else {
+                    if ((ch >= ASCII_CHARACTER_BIG_MIN && ch <= ASCII_CHARACTER_BIG_MAX)
+                        ||(ch >= ASCII_CHARACTER_LITTLE_MIN
+                        && ch <= ASCII_CHARACTER_LITTLE_MAX)) {
+                        listEnglish.add(info);
+                    } else {
+                        listChina.add(info);
+                    }
+                }
+            }
+
+
+
+5.注意，方法名字的后面要有空格
+    public void queryCommonlyUsedSoftware() {
+
+
+6.两个方法间，要留有 空行。
+
+7.闭括号，也要 有规律。
+
+
+8.代码中，除了软编码外，
+  若 需要字符串常亮或 数字，要写成全局。
+
+
+9.全局变量，要写mPres
+  就是用m后大写第一字母。
+
+
+
+10.对于字符串常量，用全局变量来定义
+   并通过类来引用。
+   1.PhonstatuBAr
+     Intent

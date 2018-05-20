@@ -1,0 +1,405 @@
+From 7261ddcec621866fd3cd90885d40fea7b64af0b8 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Fri, 14 Apr 2017 08:59:22 +0800
+Subject: [PATCH] multiWindow Dragger window
+
+Signed-off-by: CaoYongren <m18410261910@163.com>
+---
+ api/current.txt                                    |   7 +
+ api/system-current.txt                             |   7 +
+ core/java/android/content/Intent.java              |  18 +++
+ .../java/android/hardware/input/IInputManager.aidl |   2 +
+ core/java/android/hardware/input/InputManager.java |  12 ++
+ core/java/android/view/ViewRootImpl.java           |   4 +
+ .../com/android/internal/policy/PhoneWindow.java   | 178 ++++++++++++++++++++-
+ .../android/server/input/InputManagerService.java  |   8 +
+ 8 files changed, 235 insertions(+), 1 deletion(-)
+
+diff --git a/api/current.txt b/api/current.txt
+index 1104abf..a1ba069 100755
+--- a/api/current.txt
++++ b/api/current.txt
+@@ -8276,6 +8276,11 @@ package android.content {
+     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
+     field public static final java.lang.String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
+     field public static final java.lang.String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
++    field public static final java.lang.String EXTRA_RECT_BOTTOM = "android.intent.extra.rect_bottom";
++    field public static final java.lang.String EXTRA_RECT_LEFT = "android.intent.extra.rect_left";
++    field public static final java.lang.String EXTRA_RECT_NAME = "android.intent.extra.rect_name";
++    field public static final java.lang.String EXTRA_RECT_RIGHT = "android.intent.extra.rect_right";
++    field public static final java.lang.String EXTRA_RECT_TOP = "android.intent.extra.rect_top";
+     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
+     field public static final java.lang.String EXTRA_REFERRER_NAME = "android.intent.extra.REFERRER_NAME";
+     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
+@@ -8323,6 +8328,7 @@ package android.content {
+     field public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 131072; // 0x20000
+     field public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 2097152; // 0x200000
+     field public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 8192; // 0x2000
++    field public static final int FLAG_ACTIVITY_SINGLE_FULLSCREEN = 1024; // 0x400
+     field public static final int FLAG_ACTIVITY_SINGLE_TOP = 536870912; // 0x20000000
+     field public static final int FLAG_ACTIVITY_TASK_ON_HOME = 16384; // 0x4000
+     field public static final int FLAG_DEBUG_LOG_RESOLUTION = 8; // 0x8
+@@ -13956,6 +13962,7 @@ package android.hardware.input {
+     method public android.view.InputDevice getInputDevice(int);
+     method public int[] getInputDeviceIds();
+     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
++    method public void setPointerIcon(int);
+     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
+     field public static final java.lang.String ACTION_QUERY_KEYBOARD_LAYOUTS = "android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS";
+     field public static final java.lang.String META_DATA_KEYBOARD_LAYOUTS = "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+diff --git a/api/system-current.txt b/api/system-current.txt
+index 449a06b..c3bb468 100755
+--- a/api/system-current.txt
++++ b/api/system-current.txt
+@@ -8533,6 +8533,11 @@ package android.content {
+     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
+     field public static final java.lang.String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
+     field public static final java.lang.String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
++    field public static final java.lang.String EXTRA_RECT_BOTTOM = "android.intent.extra.rect_bottom";
++    field public static final java.lang.String EXTRA_RECT_LEFT = "android.intent.extra.rect_left";
++    field public static final java.lang.String EXTRA_RECT_NAME = "android.intent.extra.rect_name";
++    field public static final java.lang.String EXTRA_RECT_RIGHT = "android.intent.extra.rect_right";
++    field public static final java.lang.String EXTRA_RECT_TOP = "android.intent.extra.rect_top";
+     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
+     field public static final java.lang.String EXTRA_REFERRER_NAME = "android.intent.extra.REFERRER_NAME";
+     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
+@@ -8580,6 +8585,7 @@ package android.content {
+     field public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 131072; // 0x20000
+     field public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 2097152; // 0x200000
+     field public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 8192; // 0x2000
++    field public static final int FLAG_ACTIVITY_SINGLE_FULLSCREEN = 1024; // 0x400
+     field public static final int FLAG_ACTIVITY_SINGLE_TOP = 536870912; // 0x20000000
+     field public static final int FLAG_ACTIVITY_TASK_ON_HOME = 16384; // 0x4000
+     field public static final int FLAG_DEBUG_LOG_RESOLUTION = 8; // 0x8
+@@ -14595,6 +14601,7 @@ package android.hardware.input {
+     method public android.view.InputDevice getInputDevice(int);
+     method public int[] getInputDeviceIds();
+     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
++    method public void setPointerIcon(int);
+     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
+     field public static final java.lang.String ACTION_QUERY_KEYBOARD_LAYOUTS = "android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS";
+     field public static final java.lang.String META_DATA_KEYBOARD_LAYOUTS = "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+diff --git a/core/java/android/content/Intent.java b/core/java/android/content/Intent.java
+index 3665342..8360f44 100755
+--- a/core/java/android/content/Intent.java
++++ b/core/java/android/content/Intent.java
+@@ -3580,6 +3580,16 @@ public class Intent implements Parcelable, Cloneable {
+     public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
+ 
+     /**
++     * For passing Rect
++     */
++    public static final String EXTRA_RECT_NAME = "android.intent.extra.rect_name";
++    public static final String EXTRA_RECT_LEFT = "android.intent.extra.rect_left";
++    public static final String EXTRA_RECT_TOP = "android.intent.extra.rect_top";
++    public static final String EXTRA_RECT_RIGHT = "android.intent.extra.rect_right";
++    public static final String EXTRA_RECT_BOTTOM = "android.intent.extra.rect_bottom";
++
++
++    /**
+      * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+      * to represent that the phone is not in any dock.
+      */
+@@ -3894,6 +3904,14 @@ public class Intent implements Parcelable, Cloneable {
+      */
+     public static final int FLAG_GRANT_PREFIX_URI_PERMISSION = 0x00000080;
+ 
++     /**
++     * Both full screen and single window.
++     *
++     * If combined with {@link #FLAG_ACTIVITY_NO_ANIMATION}, it will be pure
++     * none animation (e.g. the first start activity will has no animation,
++     * either).
++     */
++    public static final int FLAG_ACTIVITY_SINGLE_FULLSCREEN = 0x00000400;
+     /**
+      * If set, the new activity is not kept in the history stack.  As soon as
+      * the user navigates away from it, the activity is finished.  This may also
+diff --git a/core/java/android/hardware/input/IInputManager.aidl b/core/java/android/hardware/input/IInputManager.aidl
+index 3601b39..2ef0a6e 100755
+--- a/core/java/android/hardware/input/IInputManager.aidl
++++ b/core/java/android/hardware/input/IInputManager.aidl
+@@ -69,4 +69,6 @@ interface IInputManager {
+     // Input device vibrator control.
+     void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
+     void cancelVibrate(int deviceId, IBinder token);
++
++    void setPointerIcon(int type);
+ }
+diff --git a/core/java/android/hardware/input/InputManager.java b/core/java/android/hardware/input/InputManager.java
+index 618864f..ea99d55 100755
+--- a/core/java/android/hardware/input/InputManager.java
++++ b/core/java/android/hardware/input/InputManager.java
+@@ -228,6 +228,18 @@ public final class InputManager {
+         }
+     }
+ 
++     /**
++      * Send a System PointerIcon type to change the mouse arrow.
++     */
++     public void setPointerIcon(int type){
++        //Log.e(TAG,"setPointerIcon in InputManager is being caller",null);
++            try {
++                mIm.setPointerIcon(type);
++            } catch (RemoteException ex) {
++                Log.w(TAG, "Could not set pintericon.", ex);
++            }
++        }
++
+     /**
+      * Gets information about the input device with the specified id.
+      * @param id The device id.
+diff --git a/core/java/android/view/ViewRootImpl.java b/core/java/android/view/ViewRootImpl.java
+index 42402eb..8ef4e07 100755
+--- a/core/java/android/view/ViewRootImpl.java
++++ b/core/java/android/view/ViewRootImpl.java
+@@ -411,6 +411,10 @@ public final class ViewRootImpl implements ViewParent,
+         }
+     }
+ 
++    public Rect getWinFrame(){
++        return mWinFrame;
++    }
++
+     // FIXME for perf testing only
+     private boolean mProfile = false;
+ 
+diff --git a/core/java/com/android/internal/policy/PhoneWindow.java b/core/java/com/android/internal/policy/PhoneWindow.java
+index dceba36..dd78056 100755
+--- a/core/java/com/android/internal/policy/PhoneWindow.java
++++ b/core/java/com/android/internal/policy/PhoneWindow.java
+@@ -90,6 +90,7 @@ import android.graphics.PixelFormat;
+ import android.graphics.Rect;
+ import android.graphics.drawable.ColorDrawable;
+ import android.graphics.drawable.Drawable;
++import android.hardware.input.InputManager;
+ import android.media.AudioManager;
+ import android.media.session.MediaController;
+ import android.media.session.MediaSessionLegacyHelper;
+@@ -156,6 +157,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+ 
+     private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
+ 
++    public final static int MW_WINDOW_RESIZE_NONE = 0;
++    public final static int MW_WINDOW_RESIZE_TOP = 1;
++    public final static int MW_WINDOW_RESIZE_BOTTOM = 2;
++    public final static int MW_WINDOW_RESIZE_LEFT = 3;
++    public final static int MW_WINDOW_RESIZE_RIGHT = 4;
++    public final static int MW_WINDOW_RESIZE_TOPLEFT = 5;
++    public final static int MW_WINDOW_RESIZE_TOPRIGHT = 6;
++    public final static int MW_WINDOW_RESIZE_BOTTOMLEFT = 7;
++    public final static int MW_WINDOW_RESIZE_BOTTOMRIGHT = 8;
++
++    private final static Rect NO_FRAME = new Rect(-1,-1,-1,-1);
++
+     private int mBorderPadding = 0;
+ 
+     /**
+@@ -3659,6 +3672,156 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+         }
+     }
+ 
++    private class TouchListener implements OnTouchListener {
++            private Rect mFrame = new Rect();
++            private Rect mNewFrame;
++            private int mLastX = 0;
++            private int mLastY = 0;
++            private ResizeWindow mResizeWindow;
++            private Rect mFullScreen;
++            private Rect mLeftDockFrame;
++            private Rect mRightDockFrame;
++            private int mResizeWays = MW_WINDOW_RESIZE_NONE;
++
++            public TouchListener(ResizeWindow rw, Rect fullScreen) {
++                mResizeWindow = rw;
++                mFullScreen = fullScreen;
++                mLeftDockFrame = new Rect(0, 0, fullScreen.right/2, fullScreen.bottom);
++                mRightDockFrame = new Rect(fullScreen.right/2, 0, fullScreen.right, fullScreen.bottom);
++            }
++
++            private boolean fitWindowInScreen(Rect pos) {
++                int w = pos.width() - 50;
++                if (pos.left < (mFullScreen.left - w)) {
++                    return false;
++                }
++                if (pos.right > (mFullScreen.right + w)) {
++                    return false;
++                }
++                int h = pos.height() - 50;
++                if (pos.bottom > (mFullScreen.bottom + h)) {
++                    return false;
++                }
++                if (pos.top < mFullScreen.top) {
++                    pos.bottom = mFullScreen.top + pos.height();
++                    pos.top = mFullScreen.top;
++                }
++                return true;
++            }
++
++            private void getResizeWays(int x, int y) {
++                if (y - mFrame.top <= mBorderPadding / 2) {
++                    if(x - mFrame.left <= mBorderPadding) {
++                        mResizeWays = MW_WINDOW_RESIZE_TOPLEFT;
++                    } else if(mFrame.right - x <= mBorderPadding) {
++                        mResizeWays = MW_WINDOW_RESIZE_TOPRIGHT;
++                    } else {
++                        mResizeWays = MW_WINDOW_RESIZE_TOP;
++                    }
++                } else if (mFrame.bottom - y <= mBorderPadding) {
++                    if(x - mFrame.left <= mBorderPadding) {
++                        mResizeWays = MW_WINDOW_RESIZE_BOTTOMLEFT;
++                    } else if(mFrame.right - x <= mBorderPadding) {
++                        mResizeWays = MW_WINDOW_RESIZE_BOTTOMRIGHT;
++                    } else {
++                        mResizeWays = MW_WINDOW_RESIZE_BOTTOM;
++                    }
++                } else if (x - mFrame.left <= mBorderPadding) {
++                    mResizeWays = MW_WINDOW_RESIZE_LEFT;
++                } else if (mFrame.right - x <= mBorderPadding) {
++                    mResizeWays = MW_WINDOW_RESIZE_RIGHT;
++                } else {
++                    mResizeWays = MW_WINDOW_RESIZE_NONE;
++                }
++            }
++
++            private void sendNewFrame(int flags) {
++                mIntentLineRect.setFlags(flags);
++                mIntentLineRect.putExtra(Intent.EXTRA_RECT_LEFT, mNewFrame.left);
++                mIntentLineRect.putExtra(Intent.EXTRA_RECT_TOP, mNewFrame.top);
++                mIntentLineRect.putExtra(Intent.EXTRA_RECT_RIGHT, mNewFrame.right);
++                mIntentLineRect.putExtra(Intent.EXTRA_RECT_BOTTOM, mNewFrame.bottom);
++                getContext().startActivity(mIntentLineRect);
++            }
++
++            @Override
++            public boolean onTouch(View v, MotionEvent event) {
++                int rawX = (int) event.getRawX();
++                int rawY = (int) event.getRawY();
++
++                if(MotionEvent.ACTION_DOWN == event.getAction()) {
++                    //setFocusedStack();
++                    mLastX = (int) event.getRawX();
++                    mLastY = (int) event.getRawY();
++                    mResizeWindow.mLastDx = 0;
++                    mResizeWindow.mLastDy = 0;
++                    mFrame.set(mDecor.getViewRootImpl().getWinFrame());
++                    mNewFrame = mFrame;
++                    getResizeWays(rawX, rawY);
++                    InputManager.getInstance().setPointerIcon(mResizeWays);
++                    if (mResizeWays != MW_WINDOW_RESIZE_NONE) {
++                        sendNewFrame(Intent.FLAG_ACTIVITY_NEW_TASK
++                                     | Intent.FLAG_ACTIVITY_NO_ANIMATION
++                                     | Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN
++                                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
++                    }
++                }
++                if(MotionEvent.ACTION_MOVE == event.getAction()) {
++                    try {
++                        int dx = rawX - mLastX;
++                        int dy = rawY - mLastY;
++                        Rect r = mResizeWindow.resize(mFrame, dx, dy, mResizeWays);
++                        if (fitWindowInScreen(r)) {
++                            if (rawX <= mFullScreen.left + mBorderPadding) {
++                                mNewFrame = mLeftDockFrame;
++                            } else if (rawX >= mFullScreen.right - mBorderPadding) {
++                                mNewFrame = mRightDockFrame;
++                            } else {
++                                if (mNewFrame == mLeftDockFrame || mNewFrame == mRightDockFrame) {
++                                    mNewFrame = NO_FRAME;
++                                    sendNewFrame(Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN);
++                                }
++                                mNewFrame = r;
++                            }
++                            if (mResizeWays != MW_WINDOW_RESIZE_NONE || mNewFrame == mLeftDockFrame
++                                    || mNewFrame == mRightDockFrame) {
++                                sendNewFrame(Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN);
++                            } else {
++                                ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mNewFrame);
++                            }
++                        }
++                    } catch (RemoteException e) {
++                        e.printStackTrace();
++                    }
++                }
++                if(MotionEvent.ACTION_UP == event.getAction()) {
++                    mDecor.getViewRootImpl().getWinFrame().set(mNewFrame);
++                    mFrame.set(mNewFrame);
++                    if (mResizeWays != MW_WINDOW_RESIZE_NONE || mNewFrame == mLeftDockFrame
++                            || mNewFrame == mRightDockFrame) {
++                        try {
++                            ActivityManagerNative.getDefault().relayoutWindow(getStackIdForMultiwindow(), mNewFrame);
++                            mNewFrame = NO_FRAME;
++                            sendNewFrame(Intent.FLAG_ACTIVITY_SINGLE_FULLSCREEN);
++                            ActivityManagerNative.getDefault().setFocusedStack(getStackIdForMultiwindow());
++                            mDecor.invalidate();
++                        } catch (RemoteException e) {
++                            e.printStackTrace();
++                        }
++                    }
++                    mResizeWays = MW_WINDOW_RESIZE_NONE;
++                }
++              return true;
++          }
++     }
++
++    public abstract class ResizeWindow {
++        public int mLastDx = 0;
++        public int mLastDy = 0;
++        protected Rect mTmpFrame = new Rect();
++        public abstract Rect resize(Rect frame, int diffX, int diffY, int ways);
++    }
++
+     class DecorMW {
+         private final static String LINERECT_LOCATION = "com.android.linerect";
+         private final static String LINERECT_ACTIVITY = "com.android.linerect.LineRectActivity";
+@@ -3695,7 +3858,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
+ 
+             mIntentLineRect = new Intent();
+             mIntentLineRect.setComponent(new ComponentName(LINERECT_LOCATION, LINERECT_ACTIVITY));
+-        }
++
++            //add Listeners
++            mHeader.setOnTouchListener(new TouchListener(new ResizeWindow() {
++                    @Override
++                    public Rect resize(Rect frame, int diffX, int diffY, int ways) {
++                        mTmpFrame.left = frame.left + diffX;
++                        mTmpFrame.top = frame.top + diffY;
++                        mTmpFrame.right = frame.right + diffX;
++                        mTmpFrame.bottom = frame.bottom + diffY;
++                        return mTmpFrame;
++                    }
++                }, mFullScreen));
++
++           }
+     }
+ 
+     protected ViewGroup generateLayout(DecorView decor) {
+diff --git a/services/core/java/com/android/server/input/InputManagerService.java b/services/core/java/com/android/server/input/InputManagerService.java
+index 0205a20..6605752 100755
+--- a/services/core/java/com/android/server/input/InputManagerService.java
++++ b/services/core/java/com/android/server/input/InputManagerService.java
+@@ -196,6 +196,7 @@ public class InputManagerService extends IInputManager.Stub
+     private static native boolean nativeTransferTouchFocus(long ptr,
+             InputChannel fromChannel, InputChannel toChannel);
+     private static native void nativeSetPointerSpeed(long ptr, int speed);
++ //   private static native void nativeSetPointerIcon(long ptr,int type);
+     private static native void nativeSetShowTouches(long ptr, boolean enabled);
+     private static native void nativeSetInteractive(long ptr, boolean interactive);
+     private static native void nativeReloadCalibration(long ptr);
+@@ -1359,6 +1360,13 @@ public class InputManagerService extends IInputManager.Stub
+ 
+     // Binder call
+     @Override
++    public void setPointerIcon(int type){
++        //Log.e(TAG,"setPointerIcon is being calling",null);
++        //nativeSetPointerIcon(mPtr, type);
++    }
++
++    // Binder call
++    @Override
+     public void vibrate(int deviceId, long[] pattern, int repeat, IBinder token) {
+         if (repeat >= pattern.length) {
+             throw new ArrayIndexOutOfBoundsException();
+-- 
+2.7.4
+

@@ -1,0 +1,210 @@
+命令窗口打开：Ctril+Alt+T     新建：Ctril+Shift+T
+Jdk：1.8
+
+1.进入文件夹: cd cyr/
+2.删除文件：rm
+    例如：rm  zhidao.txt
+3.复制文件：cp
+    例如：#cp -r object_file source_file
+	前面是：源文件
+	后面是：目标文件
+4.返回上一个目录：
+	cd  ..
+5.查看文件：
+       ls
+	ls-F  查看目录中的文件
+        ls-I显示文件和目录的详细资料
+	ls-a显示隐藏文件
+
+6.创建单个目录
+	mkdir
+7.创建多层目录
+	mkdir -p a/b
+8.不同界面间的切换  Alt+Tab
+
+9.sudo  付给权限
+
+10.编辑退出
+   :q
+11.保存后退出
+   :wq
+12.解压
+   :unzip
+
+13.删除文件夹    (权限不够加 sudo)
+   rm -r Name
+14.删除文件：
+   rm Name
+15.查看文件
+   cat name.txt
+16.编辑
+  vim  test.txt
+17.查看当前文件夹
+  cat test.txt
+
+18.查看当前目录
+  pwd
+
+19.显示日期
+   date
+20.显示日历
+   cal
+21.Tab键  具有 命令补全 功能
+
+22.终止命令
+   Ctrl+c
+23.关机
+   shutdown
+24.删除 空  的目录
+   rmdir
+25.只看头几行
+   head
+26.压缩文件
+   tar
+27.
+   i--是Insert
+
+28.就是 Tab的应用：
+   当列出文件，你写出前面的字母：
+   后面用Tab来补齐；
+29.当前行的行首
+ ctrl+a
+
+30.当前行的行尾
+ ctrl+e
+
+30.置尾
+shift+g
+
+31.置顶
+ gg连击
+32.按下ESC 按钮回到一般模式。
+
+33.搜索
+  只需要在一般模式：进行  最后 用/word进行就可以。
+34. 撤销操作
+  ctrl+u
+
+   8月1号
+35.问题：
+        编辑过程中，由于没有编辑就进行关闭，导致 Attention    .string.xml.swp 问题
+   解决：rm .strings.xml.swp
+   就是将之前的修改都 移除。
+36.问题：
+	当运行过程中，没有进行exit直接强制关闭，出现再起去启动 docker无法启动。
+    解决：docker ps将所有的 类似的进程都 列出，然后 找到自己的，
+    执行：sudo docker kill ---
+    严重时：docker kill -s 9  0f447a1757e7
+    注意就是：要看准不能 kill 别人的。
+
+37.
+登陆密码：oto124
+
+38.查看路径
+ echo $PATH
+
+39.git 方式下载代码
+    git clone +字符串
+
+40.问题：
+  在编辑无故出现：一列操作的指令
+  方法：
+       先进行 q  退出
+       再     wq 保存编辑的文件进行退出。
+
+41.总磁盘
+    sudo fdisk -l
+42.编译 make  要返回到 multiWindow.
+
+43.返回根目录：  cd ～
+
+44.注意
+   不可以在  180上操作，要在docker上操作。
+
+45.shutdown   reboot   关机 和重启
+
+
+46.:set nu显示行号
+
+47.从服务器拷贝文件/文件夹（本地）
+scp -r lh@192.168.0.180:/home/lh/cyr/multiwindow/packages/apps/Settings .
+
+
+58.搜文件
+ctril shift n
+
+59.将本地拷贝到 服务器（本地）
+scp /home/larno/dialog_system_upgrade.xml lh@192.168.0.180:/tmp
+
+
+将 文件/文件夹 从本地拷至远程 Ubuntu 机(scp)
+scp -r localfile.txt username@192.168.0.1:/home/username/
+
+60.本地间进行 拷贝：
+  
+ 如果在同一个目录下，比如：就是在cyr的下面进行复制  里面的 一个文件A 到 一个文件件B
+ B$ ../A的path
+
+本地间拷贝文件：
+
+
+
+61.加权限   chmod 777  文件
+   chmod 777 ./home/
+
+
+62.查找代码的技巧
+  1.shift n   上翻查找
+  2.shift *
+
+63.检索
+  在某个目录下进行检索
+  1.grep -r "" *
+ 
+  适用于检索 一个类 
+  2.find ./ -name activity_job_manager.xml          --(./当前目录)
+
+    也可以：find -name  Air* 
+
+
+  3.grep -rni "</>" *
+例如：
+    grep -rni "\<showVolumePanel\>" *
+
+
+64.解决问题
+fatal: Not a git repository (or any parent up to mount parent /home/kineam)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+
+解决方法：git init
+
+
+65.对比源码：
+vim -d cyr/multiWindows/frameworks/base/services/core/java/com/android/server/am/ActivityStackSupervisor.java wzx/android-5.0.1_r1/frameworks/base/services/core/java/com/android/server/am/ActivityStackSupervisor.java 
+
+
+66. tAB键   选择 查找向上 或 向下。
+
+
+67.在非 Insert的清空下
+   shift + u  撤销键
+写日报的链接：
+https://github.com/openthos/multiwin-analysis/issues/
+
+
+发的邮箱：bigandroid@googlegroups.com
+          yuchen@mail.tsinghua.edu.cn    陈愈
+
+68.vsp指令。   在一个窗口下，进行 vsp: /com/android/src/Notification.java
+
+69.vimdiff    进行两个代码文件进行对比。
+vimdiff  fie.java  fiel.java
+
+
+ubuntu上的安装软件的教程：
+http://blog.csdn.net/potatomagic
+
+
+
+
+
