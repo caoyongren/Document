@@ -12,3 +12,8 @@
     - ./bin/wxdt install
     - ./bin/wxdt
     - git pull origin # 更新
+    
+ ***
+ ### 开发工具vscode
+   - [教程](http://blog.hszofficial.site/blog/2018/02/23/Vscode%E9%85%8D%E7%BD%AE/)
+### 
