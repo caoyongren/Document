@@ -189,6 +189,8 @@
         - 5. git test
   - git push x86 mutliwindow:multiwindow //工作
   - git am --resolved //直接按照原有的补丁描述进行提交
+  -  git push origin --delete Chapater6   可以删除远程分支Chapater6 
+  - 要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
 
 ### 三．ubuntu
   - 1.进入文件夹: cd cyr/
@@ -664,7 +666,14 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Build_Instructi
 
 
 
-
+####
+- 1. AMS 和WMS的关系
+- 2. TaskBar的进入freeform栈.
+- 3. 获取Status bar 的实例。
+- 4. memory jni.
+- 5. android系统中有一个文件 proc / cat 进行查看
+- 6. mount -t ext4 -o rw sdb /storage/disk0 ## 挂载移动硬盘到openthos.
+- 7. 设计模式
 
 谢谢
 
