@@ -111,8 +111,8 @@
     - #为LockView和UnLockView的载体，用来控制显示LockView还是UnLockView界面
   - **KeyguardUpdateMonitorCallback.java** 
     - 作为更新之后的回调类，当我们跟新一些状态之后，还需要更新之后反馈一些状态时就会需要用到此类. KeyguardUpdateMonitorCallback.java当Keyguard和SystemUI中有需要回调的类，就需要先注册此Callback然后再有具体实现。
-
-
+    
+#### 调用逻辑
 
 
 
