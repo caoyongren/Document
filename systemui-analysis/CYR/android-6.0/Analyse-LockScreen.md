@@ -94,7 +94,7 @@
   - AccountUnlockScreen.java类        
     - Google账户开锁界面
   - **KeyguardUpdateMonitor.java**       
-    - ## 功能：该类的主要功能就是根据监视系统状态值的改变(例如：时间、SIM卡状态、电池电量;使用广播监听)，根据这种状态值的改变回调监听了该状态信息的对象实例.     它是来处理锁屏更新操作的类，KeyguardViewMediator.java等对于锁屏更新的额相关处理都是在这里面进行的操作。
+    - 功能：该类的主要功能就是根据监视系统状态值的改变(例如：时间、SIM卡状态、电池电量;使用广播监听)，根据这种状态值的改变回调监听了该状态信息的对象实例.     它是来处理锁屏更新操作的类，KeyguardViewMediator.java等对于锁屏更新的额相关处理都是在这里面进行的操作。
   - **KeyguardViewMediator.java**         
     -  该类是唯一实现了KeyguardUpdateMonitorCallback的类.该类的初始化是在PolicyWindowManager的构造函数中创建的.  此类是在SystemUI中做统一调度的，也就是像我们长熟悉的熄屏，亮屏，锁屏等的处理都是在这里面的做的，它是一个对Keyguard的调度者.
   - GlobalActions.java                
