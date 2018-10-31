@@ -66,7 +66,25 @@
 ```
 #### 主要类和布局解释
 ***
-
+![锁屏界面](https://github.com/caoyongren/Document/blob/master/systemui-analysis/CYR/icon/lockscreen.png)
+  - 针对keyguard_button_area三个按钮
+  - packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java
+```
+    public void onClick(View v) {
+        if (v == mCameraImageView) {
+            launchCamera();//launch camera
+        } else if (v == mLeftAffordanceView) {
+            launchLeftAffordance();
+        } if (v == mLockIcon) {
+            if (!mAccessibilityController.isAccessibilityEnabled()) {
+                handleTrustCircleClick();
+            } else {
+                mPhoneStatusBar.animateCollapsePanels(
+                        CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+            }
+        }
+    }
+```
 
 
 
