@@ -45,7 +45,7 @@
   - cd openthos/
 
 9.同步代码
-  - repo init -u ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/atc/android/m/manifest   -b android-customer-m0.3561-smartauto  --repo-url=ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/git-repo (公司提供)
+  - repo init -u  (公司提供)
   - repo sync
 
 10.编译
