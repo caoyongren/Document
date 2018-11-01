@@ -122,7 +122,7 @@
 ./src/com/android/keyguard/KeyguardUpdateMonitor.java
 ./src/com/android/keyguard/KeyguardUpdateMonitorCallback.java
 ```
-
+![app的实现demo](https://github.com/thomasvidas/Simple-Lockscreen)
 
 
 
