@@ -112,8 +112,10 @@
   - **KeyguardUpdateMonitorCallback.java** 
     - 作为更新之后的回调类，当我们跟新一些状态之后，还需要更新之后反馈一些状态时就会需要用到此类. KeyguardUpdateMonitorCallback.java当Keyguard和SystemUI中有需要回调的类，就需要先注册此Callback然后再有具体实现。
     
-#### 调用逻辑
+#### 开机显示锁屏的调用逻辑
 ![锁屏的时序图](https://github.com/caoyongren/Document/blob/master/systemui-analysis/CYR/icon/lockScreen%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
+#### 客户端实现锁屏逻辑
+![调用逻辑]()
 
 
 
