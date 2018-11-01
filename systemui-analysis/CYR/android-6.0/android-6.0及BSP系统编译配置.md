@@ -45,7 +45,7 @@
   - cd openthos/
 
 9.同步代码
-  - repo init -u ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/atc/android/m/manifest   -b android-customer-m0.3561-smartauto  --repo-url=ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/git-repo
+  - repo init -u ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/atc/android/m/manifest   -b android-customer-m0.3561-smartauto  --repo-url=ssh://sunny.wang@192.168.144.122:29418/mtk_3561_bsp/git-repo (公司提供)
   - repo sync
 
 10.编译
@@ -130,6 +130,10 @@ endif
 ```
   - 若编译不过，则上面的true->false
   - cp /usr/bin/ld.gold prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/x86_64-linux/bin/ld 
+  
+##### aosp-6.0代码
+  - https://pan.baidu.com/s/1tzEZK9om6jlAkFmvpZ9vAw
+  - 解压编译报错　特殊修改然后clean 再继续编译; emulator启动虚拟机进行
 
 
 
