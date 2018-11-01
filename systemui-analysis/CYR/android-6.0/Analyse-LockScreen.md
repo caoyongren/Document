@@ -25,6 +25,8 @@
         }
     }
 ```
+**布局的加载**
+
   - PatternUnlockScreen.java类        
     - 图案开锁界面 
   - SimUnlockScreen.java 类           
