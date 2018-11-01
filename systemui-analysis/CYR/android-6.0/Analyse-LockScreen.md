@@ -26,7 +26,10 @@
     }
 ```
 **布局的加载**
-
+  - packages/SystemUI/res/layout/status_bar_expanded.xml
+    - /packages/Keyguard/res/layout/keyguard_status_view.xml ##
+      - ./packages/Keyguard/res/layout/keyguard_status_view.xml
+        - ./packages/Keyguard/res/layout/keyguard_status_area.xml ## clock
   - PatternUnlockScreen.java类        
     - 图案开锁界面 
   - SimUnlockScreen.java 类           
