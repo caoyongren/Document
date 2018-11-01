@@ -57,7 +57,7 @@
 #### 客户端实现锁屏逻辑
 ![调用逻辑](https://github.com/caoyongren/Document/blob/master/systemui-analysis/CYR/icon/clientUse.png)
 #### 核心逻辑
-![CallBack逻辑](https://github.com/caoyongren/Document/blob/master/systemui-analysis/CYR/icon/Callbark.png)
+![CallBack逻辑-回调函数通知多个类](https://github.com/caoyongren/Document/blob/master/systemui-analysis/CYR/icon/Callbark.png)
 
 #### 主要涉及的类
 ```
