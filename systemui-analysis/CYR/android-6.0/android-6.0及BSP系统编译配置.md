@@ -29,8 +29,8 @@
 
 6.安装git
   - sudo apt-get install git
-  - git config --global  user.email "potatomagic@163.com"
-  - git config --global  user.name "wangzhixu"
+  - git config --global  user.email "＃＃@163.com"
+  - git config --global  user.name "name"
 
 7.安装wget和repo用于同步
   - sudo apt-get install wget
