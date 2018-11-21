@@ -1,7 +1,7 @@
 Alt+回车 导入包,自动修正
 Ctrl+N   查找类
 Ctrl+Shift+N 查找文件
-Ctrl+Alt+L  格式化代码
+Ctrl+Alt+w  ##格式化代码
 Ctrl+Alt+O 优化导入的类和包
 Alt+Insert 生成代码(如get,set方法,构造函数等)
 Ctrl+E或者Alt+Shift+C  最近更改的代码
@@ -13,6 +13,8 @@ Ctrl+Alt+Space 类名或接口名提示
 Ctrl+P 方法参数提示
 Ctrl+Shift+Alt+N 查找类中的方法或变量
 Alt+Shift+C 对比最近修改的代码
+
+ctrl + shift +i ## 查看当前类或方法
  
 Shift+F6  重构-重命名
 Ctrl+Shift+先上键
@@ -36,13 +38,15 @@ F2 或Shift+F2 高亮错误或警告快速定位
 Ctrl+W 选中代码，连续按会有其他效果
 选中文本，按Alt+F3 ，逐个往下查找相同文本，并高亮显示。
 Ctrl+Up/Down 光标跳转到第一行或最后一行下
-Ctrl+B 快速打开光标处的类或方法 
+Ctrl+B 快速１打开光标处的类或方法 
 最常用快捷键
-1.Ctrl＋E，可以显示最近编辑的文件列表
+
+1.Ctrl＋E，　##可以显示最近编辑的文件列表
+
 2.Shift＋Click可以关闭文件
 3.Ctrl＋[或]可以跳到大括号的开头结尾
 4.Ctrl＋Shift＋Backspace可以跳转到上次编辑的地方
-5.Ctrl＋F12，可以显示当前文件的结构
+5.Ctrl＋F12，##可以显示当前文件的结构
 6.Ctrl＋F7可以查询当前元素在当前文件中的引用，然后按F3可以选择
 7.Ctrl＋N，可以快速打开类
 8.Ctrl＋Shift＋N，可以快速打开文件
@@ -71,4 +75,15 @@ Ctrl+B 快速打开光标处的类或方法
 30.Ctrl＋Alt＋Up /Ctrl＋Alt＋Down可以快速跳转搜索结果
 31.Ctrl＋Shift＋J可以整合两行
 32.Alt＋F8是计算变量值
+
+33. ctrl + f11 ## 添加书签 做好标记
+  - ctrl +  标记##　例如ctrl + 1## 调到第一个标签
+
+34. Alt + Q ## 显示父类
+35. ctrl+shift+f12 ## 隐藏无用的面板
+
+
+
+
+
 
