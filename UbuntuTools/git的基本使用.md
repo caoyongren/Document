@@ -192,3 +192,29 @@ git push origin v1.5
   - 将改动提交到分支中
   - 将新分支推送到 GitHub 的副本中.
 ***
+
+
+***
+  - 总结: git merge / git rebase /
+  - git merge
+    - 当fixbug提交了补丁commitId-01，切换master分支提交commitId-02，git merge 后，将补丁commitId-01应用到master.
+  - git rebase
+    - 新建分之bugFix，然后提交C2
+    - 切回master分之, 提交C3
+    - 切回bugFix分之, 执行git rebase, bugFix的父节点变成master分支，之前的C2节点就被新的提交C2`所替代了。
+    - 常应用: git rebase -i HEAD~2 ## 更改commit 信息, 之后执行git commit --amend 再git rebase --continue
+  - 移动HEAD
+    - git checkout HEAD~3
+  - 提交树上移动分之
+    - git banch -f bugfix C0(commid) #将bugfix指向c0
+    - git branch -f master c6 # master 指向c6
+
+  - 撤销操作
+    - git reset --HEAD^
+  - git cherry-pick
+    - 将fixbug分之中的c1 / side分之 中的c2, 在master下，通过git cherry-pick c1 c2 
+
+
+
+
+
